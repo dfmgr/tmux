@@ -169,6 +169,7 @@ failexitcode
 
 run_postinst() {
   run_postinst_global
+  if [ ! -f "$HOME/.taskrc" ]; then touch "$HOME/.taskrc" ; fi
   ln -sf "$APPDIR/tmux.conf" "$HOME/.tmux.conf"
   if [ -f "$PLUGDIR/scripts/install_plugins.sh" ]; then
     unset TMUX TMUX_PLUGIN_MANAGER_PATH
