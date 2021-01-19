@@ -52,7 +52,7 @@ APPNAME="${APPNAME:-tmux}"
 APPDIR="${APPDIR:-$HOME/.config/$APPNAME}"
 REPO="${DFMGRREPO:-https://github.com/dfmgr}/${APPNAME}"
 REPORAW="${REPORAW:-$REPO/raw}"
-APPVERSION="$(curl -LSs $REPORAW/master/version.txt)"
+APPVERSION="$(__appversion)"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -137,15 +137,15 @@ ensure_perms
 
 # Main progam
 
-if [ -d "$APPDIR/.git" ]; then
+if [ -d "$DOWNLOADED_TO/.git" ]; then
   execute \
-  "git_update $APPDIR" \
-  "Updating $APPNAME configurations"
+    "git_update $APPDIR" \
+    "Updating $APPNAME configurations"
 else
   execute \
-  "backupapp && \
+    "backupapp && \
         git_clone -q $REPO/$APPNAME $APPDIR" \
-  "Installing $APPNAME configurations"
+    "Installing $APPNAME configurations"
 fi
 
 # exit on fail
@@ -158,12 +158,12 @@ failexitcode
 if [ "$PLUGNAMES" != "" ]; then
   if [ -d "$PLUGDIR"/tpm/.git ]; then
     execute \
-    "git_update $PLUGDIR/tpm" \
-    "Updating plugin tpm"
+      "git_update $PLUGDIR/tpm" \
+      "Updating plugin tpm"
   else
     execute \
-    "git_clone https://github.com/tmux-plugins/tpm $PLUGDIR/tpm" \
-    "Installing plugin tpm"
+      "git_clone https://github.com/tmux-plugins/tpm $PLUGDIR/tpm" \
+      "Installing plugin tpm"
   fi
 fi
 
@@ -177,20 +177,20 @@ failexitcode
 run_postinst() {
   dfmgr_run_post
   if [ ! -f "$HOME/.taskrc" ]; then touch "$HOME/.taskrc"; fi
-  ln -sf "$APPDIR/tmux.conf" "$HOME/.tmux.conf"
+  ln -sf "$DOWNLOADED_TO/tmux.conf" "$HOME/.tmux.conf"
   if [ -f "$PLUGDIR/scripts/install_plugins.sh" ]; then
     unset TMUX TMUX_PLUGIN_MANAGER_PATH
     TMUX_PLUGIN_MANAGER_PATH="$HOME/.local/share/tmux/tpm"
     bash -c $"PLUGDIR/scripts/install_plugins.sh"
   fi
   mkd "$HOME/.local/share/tmux/resurrect"
-  ln_sf "$APPDIR/resurrect" "$HOME/.local/share/tmux/resurrect/last"
+  ln_sf "$DOWNLOADED_TO/resurrect" "$HOME/.local/share/tmux/resurrect/last"
 
 }
 
 execute \
-"run_postinst" \
-"Running post install scripts"
+  "run_postinst" \
+  "Running post install scripts"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
