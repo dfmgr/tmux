@@ -139,12 +139,12 @@ ensure_perms
 
 if [ -d "$DOWNLOADED_TO/.git" ]; then
   execute \
-    "git_update $APPDIR" \
+    "git_update $DOWNLOADED_TO" \
     "Updating $APPNAME configurations"
 else
   execute \
     "backupapp && \
-        git_clone -q $REPO/$APPNAME $APPDIR" \
+        git_clone -q $REPO/$APPNAME $DOWNLOADED_TO" \
     "Installing $APPNAME configurations"
 fi
 
@@ -176,16 +176,11 @@ failexitcode
 
 run_postinst() {
   dfmgr_run_post
-  if [ ! -f "$HOME/.taskrc" ]; then touch "$HOME/.taskrc"; fi
-  ln -sf "$DOWNLOADED_TO/tmux.conf" "$HOME/.tmux.conf"
-  if [ -f "$PLUGDIR/scripts/install_plugins.sh" ]; then
-    unset TMUX TMUX_PLUGIN_MANAGER_PATH
-    TMUX_PLUGIN_MANAGER_PATH="$HOME/.local/share/tmux/tpm"
-    bash -c $"PLUGDIR/scripts/install_plugins.sh"
-  fi
   mkd "$HOME/.local/share/tmux/resurrect"
-  ln_sf "$DOWNLOADED_TO/resurrect" "$HOME/.local/share/tmux/resurrect/last"
-
+  if [ ! -f "$HOME/.taskrc" ]; then touch "$HOME/.taskrc"; fi
+  ln -sf "$APPDIR/tmux.conf" "$HOME/.tmux.conf"
+  [ -f "$PLUGDIR/scripts/install_plugins.sh" ] && bash -c "TMUX_PLUGIN_MANAGER_PATH=$HOME/.local/share/tmux/tpm $PLUGDIR/scripts/install_plugins.sh"
+  ln_sf "$APPDIR/resurrect" "$HOME/.local/share/tmux/resurrect/last"
 }
 
 execute \
