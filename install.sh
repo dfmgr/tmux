@@ -156,17 +156,17 @@ failexitcode
 # Plugins
 
 if __am_i_online; then
-if [ "$PLUGNAMES" != "" ]; then
-  if [ -d "$PLUGDIR"/tpm/.git ]; then
-    execute \
-      "git_update $PLUGDIR/tpm" \
-      "Updating plugin tpm"
-  else
-    execute \
-      "git_clone https://github.com/tmux-plugins/tpm $PLUGDIR/tpm" \
-      "Installing plugin tpm"
+  if [ "$PLUGNAMES" != "" ]; then
+    if [ -d "$PLUGDIR"/tpm/.git ]; then
+      execute \
+        "git_update $PLUGDIR/tpm" \
+        "Updating plugin tpm"
+    else
+      execute \
+        "git_clone https://github.com/tmux-plugins/tpm $PLUGDIR/tpm" \
+        "Installing plugin tpm"
+    fi
   fi
-fi
 fi
 
 # exit on fail
@@ -182,7 +182,9 @@ run_postinst() {
   if [ ! -f "$HOME/.taskrc" ]; then touch "$HOME/.taskrc"; fi
   ln -sf "$APPDIR/tmux.conf" "$HOME/.tmux.conf"
   ln_sf "$APPDIR/resurrect" "$HOME/.local/share/tmux/resurrect/last"
-  __am_i_online && [ -f "$PLUGDIR/scripts/install_plugins.sh" ] && bash -c "TMUX_PLUGIN_MANAGER_PATH=$HOME/.local/share/tmux/tpm $PLUGDIR/scripts/install_plugins.sh"
+  if __am_i_online && [ -f "$PLUGDIR/scripts/install_plugins.sh" ]; then
+    bash -c "TMUX_PLUGIN_MANAGER_PATH=$HOME/.local/share/tmux/tpm $PLUGDIR/scripts/install_plugins.sh"
+  fi
 }
 
 execute \
