@@ -137,14 +137,17 @@ ensure_perms
 
 # Main progam
 
+if [ -d "$APPDIR" ]; then
+  execute "backupapp $APPDIR $APPNAME" "Backing up $APPDIR"
+fi
+
 if [ -d "$DOWNLOADED_TO/.git" ]; then
   execute \
     "git_update $DOWNLOADED_TO" \
     "Updating $APPNAME configurations"
 else
   execute \
-    "backupapp && \
-        git_clone -q $REPO/$APPNAME $DOWNLOADED_TO" \
+    "git_clone -q $REPO/$APPNAME $DOWNLOADED_TO" \
     "Installing $APPNAME configurations"
 fi
 
@@ -167,10 +170,10 @@ if __am_i_online; then
         "Installing plugin tpm"
     fi
   fi
-fi
 
-# exit on fail
-failexitcode
+  # exit on fail
+  failexitcode
+fi
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -179,8 +182,8 @@ failexitcode
 run_postinst() {
   dfmgr_run_post
   mkd "$HOME/.local/share/tmux/resurrect"
-  if [ ! -f "$HOME/.taskrc" ]; then touch "$HOME/.taskrc"; fi
-  ln -sf "$APPDIR/tmux.conf" "$HOME/.tmux.conf"
+  touch "$HOME/.taskrc"
+  ln_sf "$APPDIR/tmux.conf" "$HOME/.tmux.conf"
   ln_sf "$APPDIR/resurrect" "$HOME/.local/share/tmux/resurrect/last"
   if __am_i_online && [ -f "$PLUGDIR/scripts/install_plugins.sh" ]; then
     bash -c "TMUX_PLUGIN_MANAGER_PATH=$HOME/.local/share/tmux/tpm $PLUGDIR/scripts/install_plugins.sh"
