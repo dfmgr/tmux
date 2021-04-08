@@ -50,14 +50,15 @@ scripts_check
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Defaults
 APPNAME="${APPNAME:-tmux}"
-APPDIR="${APPDIR:-$HOME/.config/$APPNAME}"
-INSTDIR="${INSTDIR}"
-REPO="${DFMGRREPO:-https://github.com/dfmgr/$APPNAME}"
-REPORAW="${REPORAW:-$REPO/raw}"
-APPVERSION="$(__appversion "$REPORAW/master/version.txt")"
+APPDIR="$CONF/$APPNAME"
+INSTDIR="$CASJAYSDEVSHARE/$SCRIPTS_PREFIX/$APPNAME"
+REPO_BRANCH="${GIT_REPO_BRANCH:-master}"
+REPO="${DFMGR:-https://github.com/dfmgr}/$APPNAME"
+REPORAW="$REPO/raw/$REPO_BRANCH"
+APPVERSION="$(__appversion "$REPORAW/version.txt")"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Setup plugins
-PLUGNAMES=""
+PLUGNAMES="tpm "
 PLUGDIR="${SHARE:-$HOME/.local/share}/$APPNAME"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Call the dfmgr function
@@ -122,7 +123,7 @@ if __am_i_online; then
   if [ -d "$INSTDIR/.git" ]; then
     execute "git_update $INSTDIR" "Updating $APPNAME configurations"
   else
-    execute "git_clone $REPO/$APPNAME $INSTDIR" "Installing $APPNAME configurations"
+    execute "git_clone $REPO $INSTDIR" "Installing $APPNAME configurations"
   fi
   # exit on fail
   failexitcode $? "Git has failed"
@@ -131,11 +132,11 @@ fi
 # Plugins
 if __am_i_online; then
   if [ "$PLUGNAMES" != "" ]; then
-    if [ -d "$PLUGDIR"/PLUREP/.git ]; then
-      execute "git_update $PLUGDIR/PLUGREP" "Updating plugin PLUGNAME"
+    if [ -d "$PLUGDIR/tpm/.git" ]; then
+      execute "git_update $PLUGDIR/tpm" "Updating plugin tpm"
     else
       execute
-      "git_clone PLUGINREPO $PLUGDIR/PLUGREP" "Installing plugin PLUGREP"
+      "git_clone https://github.com/tmux-plugins/tpm $PLUGDIR/tpm" "Installing plugin tpm"
     fi
   fi
   # exit on fail
@@ -149,8 +150,8 @@ run_postinst() {
   touch "$HOME/.taskrc"
   ln_sf "$APPDIR/tmux.conf" "$HOME/.tmux.conf"
   ln_sf "$APPDIR/resurrect" "$HOME/.local/share/tmux/resurrect/last"
-  if __am_i_online && [ -f "$PLUGDIR/scripts/install_plugins.sh" ]; then
-    bash -c "TMUX_PLUGIN_MANAGER_PATH=$HOME/.local/share/tmux/tpm $PLUGDIR/scripts/install_plugins.sh"
+  if __am_i_online && [ -f "$PLUGDIR/tpm/scripts/install_plugins.sh" ]; then
+    TMUX_PLUGIN_MANAGER_PATH="$PLUGDIR/tpm" bash -c "$PLUGDIR/tpm/scripts/install_plugins.sh"
   fi
 }
 #
