@@ -135,8 +135,7 @@ if __am_i_online; then
     if [ -d "$PLUGDIR/tpm/.git" ]; then
       execute "git_update $PLUGDIR/tpm" "Updating plugin tpm"
     else
-      execute
-      "git_clone https://github.com/tmux-plugins/tpm $PLUGDIR/tpm" "Installing plugin tpm"
+      execute "git_clone https://github.com/tmux-plugins/tpm $PLUGDIR/tpm" "Installing plugin tpm"
     fi
   fi
   # exit on fail
