@@ -5,7 +5,7 @@ tmux is a terminal multiplexer
 Automatic install/update:
 
 ```shell
-bash -c "$(curl -LSs https://github.com/dfmgr/tmux/raw/master/install.sh)"
+bash -c "$(curl -LSs https://github.com/dfmgr/tmux/raw/main/install.sh)"
 ```
 
 Manual install:
