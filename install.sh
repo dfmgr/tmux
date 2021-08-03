@@ -130,6 +130,7 @@ if __am_i_online; then
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Plugins
+TMUX_PLUGIN_MANAGER_PATH="$HOME/.local/share/tmux/plugins"
 if __am_i_online; then
   if [ "$PLUGNAMES" != "" ]; then
     if [ -d "$PLUGDIR/tpm/.git" ]; then
@@ -149,8 +150,8 @@ run_postinst() {
   touch "$HOME/.taskrc"
   ln_sf "$APPDIR/tmux.conf" "$HOME/.tmux.conf"
   ln_sf "$APPDIR/resurrect" "$HOME/.local/share/tmux/resurrect/last"
-  if __am_i_online && [ -f "$PLUGDIR/tpm/scripts/install_plugins.sh" ]; then
-    TMUX_PLUGIN_MANAGER_PATH="$PLUGDIR/tpm" bash -c "$PLUGDIR/tpm/scripts/install_plugins.sh"
+  if __am_i_online && [ -f "$PLUGDIR/tpm/bin/install_plugins" ]; then
+    TMUX_PLUGIN_MANAGER_PATH="$PLUGDIR/tpm" bash -c "$PLUGDIR/tpm/bin/install_plugins"
   fi
 }
 #
