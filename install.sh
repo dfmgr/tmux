@@ -146,12 +146,12 @@ fi
 # run post install scripts
 run_postinst() {
   dfmgr_run_post
-  mkd "$HOME/.local/share/tmux/resurrect"
   touch "$HOME/.taskrc"
   ln_sf "$APPDIR/tmux.conf" "$HOME/.tmux.conf"
   if __am_i_online && [ -f "$PLUGDIR/tpm/bin/install_plugins" ]; then
     TMUX_PLUGIN_MANAGER_PATH="$PLUGDIR/tpm" bash -c "$PLUGDIR/tpm/bin/install_plugins"
   fi
+  mkd "$HOME/.local/share/tmux/resurrect"
   ln_sf "$APPDIR/resurrect" "$HOME/.local/share/tmux/resurrect/last"
 }
 #
