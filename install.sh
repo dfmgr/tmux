@@ -149,10 +149,10 @@ run_postinst() {
   mkd "$HOME/.local/share/tmux/resurrect"
   touch "$HOME/.taskrc"
   ln_sf "$APPDIR/tmux.conf" "$HOME/.tmux.conf"
-  ln_sf "$APPDIR/resurrect" "$HOME/.local/share/tmux/resurrect/last"
   if __am_i_online && [ -f "$PLUGDIR/tpm/bin/install_plugins" ]; then
     TMUX_PLUGIN_MANAGER_PATH="$PLUGDIR/tpm" bash -c "$PLUGDIR/tpm/bin/install_plugins"
   fi
+  ln_sf "$APPDIR/resurrect" "$HOME/.local/share/tmux/resurrect/last"
 }
 #
 execute "run_postinst" "Running post install scripts"
