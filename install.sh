@@ -119,7 +119,7 @@ if [ -d "$APPDIR" ]; then
   execute "backupapp $APPDIR $APPNAME" "Backing up $APPDIR"
 fi
 # Main progam
-if __am_i_online; then
+if am_i_online; then
   if [ -d "$INSTDIR/.git" ]; then
     execute "git_update $INSTDIR" "Updating $APPNAME configurations"
   else
@@ -131,7 +131,7 @@ fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Plugins
 TMUX_PLUGIN_MANAGER_PATH="$HOME/.local/share/tmux/plugins"
-if __am_i_online; then
+if am_i_online; then
   if [ "$PLUGNAMES" != "" ]; then
     if [ -d "$PLUGDIR/tpm/.git" ]; then
       execute "git_update $PLUGDIR/tpm" "Updating plugin tpm"
@@ -148,7 +148,7 @@ run_postinst() {
   dfmgr_run_post
   touch "$HOME/.taskrc"
   ln_sf "$APPDIR/tmux.conf" "$HOME/.tmux.conf"
-  if __am_i_online && [ -f "$PLUGDIR/tpm/bin/install_plugins" ]; then
+  if am_i_online && [ -f "$PLUGDIR/tpm/bin/install_plugins" ]; then
     TMUX_PLUGIN_MANAGER_PATH="$PLUGDIR/tpm" bash -c "$PLUGDIR/tpm/bin/install_plugins"
   fi
   mkd "$HOME/.local/share/tmux/resurrect"
