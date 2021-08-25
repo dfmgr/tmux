@@ -34,7 +34,7 @@ export TMUX_HOME TMUX_PLUGIN_MANAGER_PATH TMUX_SHARE_DIR
 [ -x "$TMUX_PLUGIN_MANAGER_PATH/bin/install_plugins" ] &&
   $TMUX_PLUGIN_MANAGER_PATH/bin/install_plugins
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-mkdir -p "$TMUX_SHARE_DIR/tmux/resurrect"
+mkdir -p "$TMUX_SHARE_DIR/resurrect"
 [[ -f "$TMUX_HOME/resurrect" ]] && ln -sf "$TMUX_HOME/resurrect" "$TMUX_SHARE_DIR/resurrect/last"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 [[ -f "$TMUX_PLUGIN_MANAGER_PATH/tpm" ]] && [[ -f "$TMUX_SHARE_DIR/resurrect/last" ]] && echo "Install completed"
