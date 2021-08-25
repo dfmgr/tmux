@@ -58,7 +58,7 @@ REPORAW="$REPO/raw/$REPO_BRANCH"
 APPVERSION="$(__appversion "$REPORAW/version.txt")"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Setup plugins
-PLUGNAMES="tpm "
+PLUGNAMES=""
 PLUGDIR="${SHARE:-$HOME/.local/share}/$APPNAME"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Call the dfmgr function
@@ -130,13 +130,12 @@ if am_i_online; then
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Plugins
-TMUX_PLUGIN_MANAGER_PATH="$HOME/.local/share/tmux/plugins"
 if am_i_online; then
   if [ "$PLUGNAMES" != "" ]; then
-    if [ -d "$PLUGDIR/tpm/.git" ]; then
-      execute "git_update $PLUGDIR/tpm" "Updating plugin tpm"
+    if [ -d "$PLUGDIR" ]; then
+      execute "" "Updating plugin"
     else
-      execute "git_clone https://github.com/tmux-plugins/tpm $PLUGDIR/tpm" "Installing plugin tpm"
+      execute "" "Installing plugin"
     fi
   fi
   # exit on fail
@@ -148,12 +147,9 @@ run_postinst() {
   dfmgr_run_post
   touch "$HOME/.taskrc"
   ln_sf "$APPDIR/tmux.conf" "$HOME/.tmux.conf"
-  if am_i_online && [ -f "$PLUGDIR/tpm/bin/install_plugins" ]; then
-    TMUX_PLUGIN_MANAGER_PATH="$PLUGDIR/tpm" bash -c "$PLUGDIR/tpm/bin/install_plugins"
-  fi
-  mkd "$HOME/.local/share/tmux/resurrect"
-  ln_sf "$APPDIR/resurrect" "$HOME/.local/share/tmux/resurrect/last"
+  [[ -f "$INSTDIR/etc/install_plugins.sh" ]] && bash -c "$INSTDIR/etc/install_plugins.sh"
 }
+
 #
 execute "run_postinst" "Running post install scripts"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

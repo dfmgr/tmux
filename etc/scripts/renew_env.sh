@@ -9,4 +9,4 @@ tmux list-panes -s -F "$pane_fmt" | awk '
   # renew environment variables according to update-environment tmux option
   # also clear screen
   tmux send-keys -t "$pane_id" 'Enter' 'eval "$(tmux show-env -s)"' 'Enter' 'C-l'
-done;
+done

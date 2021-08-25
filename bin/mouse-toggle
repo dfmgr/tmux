@@ -36,7 +36,7 @@ fi
 # helper function
 __version() { app_version; }
 __help() {
-  app_help "Usage: mouse-toggle  -  mouse-toggle --version"  \
+  app_help "Usage: mouse-toggle  -  mouse-toggle --version" \
     "-v, --version          -  display version" \
     "-h, --help             -  display help"
 }
@@ -46,8 +46,8 @@ main() {
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # options
   case $1 in
-    -v | --version) __version ;;
-    -h | --help) __help ;;
+  -v | --version) __version ;;
+  -h | --help) __help ;;
   esac
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # Required app check
@@ -70,7 +70,7 @@ main() {
       tmux set-window-option -gq mouse on
       tmux display-message "Mouse: ON"
     fi
-  exitCode=0
+    exitCode=0
   else
     printf_red "This doesn't seem to be a tmux session"
     exitCode=0
@@ -84,4 +84,3 @@ main "$@"
 exit $?
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # end
-
