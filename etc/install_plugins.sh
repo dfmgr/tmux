@@ -28,17 +28,13 @@ TMUX_SHARE_DIR="$HOME/.local/share/tmux"
 TMUX_PLUGIN_MANAGER_PATH="$TMUX_SHARE_DIR/tpm"
 export TMUX_HOME TMUX_PLUGIN_MANAGER_PATH TMUX_SHARE_DIR
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-if [[ -d "$TMUX_PLUGIN_MANAGER_PATH/.git" ]]; then
-  git -C "$TMUX_PLUGIN_MANAGER_PATH" pull
-else
+[[ -d "$TMUX_PLUGIN_MANAGER_PATH/.git" ]] && git -C "$TMUX_PLUGIN_MANAGER_PATH" pull ||
   git clone https://github.com/tmux-plugins/tpm "$TMUX_PLUGIN_MANAGER_PATH"
-fi
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-mkdir -p "$TMUX_SHARE_DIR/tmux/resurrect"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 [ -x "$TMUX_PLUGIN_MANAGER_PATH/bin/install_plugins" ] &&
   $TMUX_PLUGIN_MANAGER_PATH/bin/install_plugins
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+mkdir -p "$TMUX_SHARE_DIR/tmux/resurrect"
 [[ -f "$TMUX_HOME/resurrect" ]] && ln -sf "$TMUX_HOME/resurrect" "$TMUX_SHARE_DIR/resurrect/last"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 [[ -f "$TMUX_PLUGIN_MANAGER_PATH/tpm" ]] && [[ -f "$TMUX_SHARE_DIR/resurrect/last" ]] && echo "Install completed"
