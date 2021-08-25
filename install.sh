@@ -147,7 +147,7 @@ run_postinst() {
   dfmgr_run_post
   touch "$HOME/.taskrc"
   ln_sf "$APPDIR/tmux.conf" "$HOME/.tmux.conf"
-  [[ -f "$INSTDIR/etc/install_plugins.sh" ]] && bash -c "$INSTDIR/etc/install_plugins.sh"
+  [[ -x "$INSTDIR/etc/install_plugins.sh" ]] && eval "$INSTDIR/etc/install_plugins.sh"
 }
 
 #
