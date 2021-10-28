@@ -148,7 +148,8 @@ run_postinst() {
   touch "$HOME/.taskrc"
   ln_sf "$APPDIR/tmux.conf" "$HOME/.tmux.conf"
   [[ -x "$INSTDIR/etc/install_plugins.sh" ]] && eval "$INSTDIR/etc/install_plugins.sh"
-  cp_rf "$APPDIR/resurrect" "$HOME/.local/share/tmux/resurrect/last"
+  mkdir -p "$HOME/.local/share/tmux/resurrect"
+  ln_sf "$APPDIR/resurrect" "$HOME/.local/share/tmux/resurrect/last"
 }
 
 #
