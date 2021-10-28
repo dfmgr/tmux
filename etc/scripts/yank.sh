@@ -3,7 +3,7 @@
 set -eu
 
 cmd_exists() {
-  type "$1" &>/dev/null
+  type "$1" &>/dev/null || return 1
 }
 
 # get data either form stdin or from file
@@ -64,4 +64,4 @@ esc="\033Ptmux;\033$esc\033\\"
 pane_active_tty=$(tmux list-panes -F "#{pane_active} #{pane_tty}" | awk '$1=="1" { print $2 }')
 target_tty="${SSH_TTY:-$pane_active_tty}"
 
-printf "$esc" >"$target_tty"
+printf '%s' "$esc" >"$target_tty"
