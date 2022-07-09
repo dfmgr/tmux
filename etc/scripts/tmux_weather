@@ -75,7 +75,7 @@ while :; do
 done
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main application
-if [ -f "$HOME/.cache/tmux_weather" ]; then
+if [ -f "$HOME/.cache/tmux_weather" ] && [ -s "$HOME/.cache/tmux_weather" ]; then
   find "$HOME/.cache/tmux_weather" -daystart -maxdepth 1 -mmin +300 -type f -exec rm -f {} \;
 else
   curl -q -ILSsf -m 1 --retry 1 "https://1.1.1.1" | grep -qi 'server:*.cloudflare' &&
