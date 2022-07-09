@@ -42,45 +42,40 @@ __help() {
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main function
-main() {
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  # options
-  case $1 in
-  -v | --version) __version ;;
-  -h | --help) __help ;;
-  esac
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  # Required app check
-  cmd_exists --error bash || exit 1
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  # begin main app
-  if [[ -n "$TMUX" ]]; then
-    if [[ -z "$(tmux show-options -gw mouse | grep off)" ]]; then
-      tmux set-option -gq mouse-utf8 off
-      tmux set-option -gq mouse-resize-pane off
-      tmux set-option -gq mouse-select-pane off
-      tmux set-option -gq mouse-select-window off
-      tmux set-window-option -gq mouse off
-      tmux display-message "Mouse: OFF"
-    else
-      tmux set-option -gq mouse-utf8 on
-      tmux set-option -gq mouse-resize-pane on
-      tmux set-option -gq mouse-select-pane on
-      tmux set-option -gq mouse-select-window on
-      tmux set-window-option -gq mouse on
-      tmux display-message "Mouse: ON"
-    fi
-    exitCode=0
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# options
+case $1 in
+-v | --version) __version ;;
+-h | --help) __help ;;
+esac
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Required app check
+cmd_exists --error bash || exit 1
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# begin main app
+if [[ -n "$TMUX" ]]; then
+  if tmux show-options -gw mouse 2>&1 | grep -q off; then
+    tmux set-option -gq mouse-utf8 off
+    tmux set-option -gq mouse-resize-pane off
+    tmux set-option -gq mouse-select-pane off
+    tmux set-option -gq mouse-select-window off
+    tmux set-window-option -gq mouse off
+    tmux display-message "Mouse: OFF"
   else
-    printf_red "This doesn't seem to be a tmux session"
-    exitCode=0
+    tmux set-option -gq mouse-utf8 on
+    tmux set-option -gq mouse-resize-pane on
+    tmux set-option -gq mouse-select-pane on
+    tmux set-option -gq mouse-select-window on
+    tmux set-window-option -gq mouse on
+    tmux display-message "Mouse: ON"
   fi
-  return "${exitCode:-$?}"
-}
+  exitCode=0
+else
+  printf_red "This doesn't seem to be a tmux session"
+  exitCode=0
+fi
+exitCode="${exitCode:-$?}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# execute function
-main "$@"
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-exit $?
+exit ${exitCode:-$?}
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # end
