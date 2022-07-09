@@ -1,18 +1,24 @@
 #!/usr/bin/env bash
-
-# Copy of https://github.com/Bash-it/bash-it/blob/master/completion/available/tmux.completion.bash
-# and https://github.com/przepompownia/bash-it/blob/master/completion/available/tmux.completion.bash
-# slightly refactored
-
-# tmux completion
-# See: http://www.debian-administration.org/articles/317 for how to write more.
-# Usage: Put "source bash_completion_tmux.sh" into your .bashrc
-# Based upon the example at http://paste-it.appspot.com/Pj4mLycDE
-
+#!/usr/bin/env bash
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+##@Version           :  202207042123-git
+# @Author            :  Jason Hempstead
+# @Contact           :  jason@casjaysdev.com
+# @License           :  LICENSE.md
+# @ReadME            :  tmux --help
+# @Copyright         :  Copyright: (c) 2022 Jason Hempstead, Casjays Developments
+# @Created           :  Saturday, Jul 09, 2022 15:11 EDT
+# @File              :  tmux
+# @Description       :
+# @TODO              :
+# @Other             :
+# @Resource          :
+# @sudo/root         :  no
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 function _tmux_complete_client() {
     local IFS=$'\n'
     local cur="${1}" && shift
-    COMPREPLY=(${COMPREPLY[@]:-} $(compgen -W "$(tmux "$@" list-clients -F '#{client_tty}' 2>/dev/null)" -- "${cur}"))
+    COMPREPLY=("${COMPREPLY[@]:-}" $(compgen -W "$(tmux "$@" list-clients -F '#{client_tty}' 2>/dev/null)" -- "${cur}"))
     options=""
     return 0
 }
@@ -20,16 +26,17 @@ function _tmux_complete_client() {
 function _tmux_complete_session() {
     local IFS=$'\n'
     local cur="${1}" && shift
-    COMPREPLY=(${COMPREPLY[@]:-} $(compgen -W "$(tmux "$@" list-sessions -F '#{session_name}' 2>/dev/null)" -- "${cur}"))
+    COMPREPLY=("${COMPREPLY[@]:-}" $(compgen -W "$(tmux "$@" list-sessions -F '#{session_name}' 2>/dev/null)" -- "${cur}"))
     options=""
     return 0
 }
 
 function _tmux_complete_window() {
+    local cur session_name sessions
     local IFS=$'\n'
-    local cur="${1}" && shift
-    local session_name="$(echo "${cur}" | sed 's/\\//g' | cut -d ':' -f 1)"
-    local sessions
+    cur="${1}" && shift
+    session_name="$(echo "${cur}" | sed 's/\\//g' | cut -d ':' -f 1)"
+    sessions
 
     sessions="$(tmux "$@" list-sessions 2>/dev/null | sed -re 's/([^:]+:).*$/\1/')"
     if [[ -n "${session_name}" ]]; then
@@ -38,7 +45,7 @@ function _tmux_complete_window() {
     fi
     cur="$(echo "${cur}" | sed -e 's/:/\\\\:/')"
     sessions="$(echo "${sessions}" | sed -e 's/:/\\\\:/')"
-    COMPREPLY=(${COMPREPLY[@]:-} $(compgen -W "${sessions}" -- "${cur}"))
+    COMPREPLY=("${COMPREPLY[@]:-}" $(compgen -W "${sessions}" -- "${cur}"))
     options=""
     return 0
 }
@@ -46,14 +53,14 @@ function _tmux_complete_window() {
 function _tmux_complete_socket_name() {
     local IFS=$'\n'
     local cur="${1}" && shift
-    COMPREPLY=(${COMPREPLY[@]:-} $(compgen -W "$(find /tmp/tmux-$UID -type s -printf '%P\n')" -- "${cur}"))
+    COMPREPLY=("${COMPREPLY[@]:-}" $(compgen -W "$(find /tmp/tmux-$UID -type s -printf '%P\n')" -- "${cur}"))
     options=""
     return 0
 }
 function _tmux_complete_socket_path() {
     local IFS=$'\n'
     local cur="${1}" && shift
-    COMPREPLY=(${COMPREPLY[@]:-} $(compgen -W "$(find /tmp/tmux-$UID -type s -printf '%p\n')" -- "${cur}"))
+    COMPREPLY=("${COMPREPLY[@]:-}" $(compgen -W "$(find /tmp/tmux-$UID -type s -printf '%p\n')" -- "${cur}"))
     options=""
     return 0
 }
@@ -182,12 +189,11 @@ _tmux() {
     fi       # command specified
 
     if [[ -n "${options}" ]]; then
-        COMPREPLY=(${COMPREPLY[@]:-} $(compgen -W "${options}" -- "${cur}"))
+        COMPREPLY=("${COMPREPLY[@]:-}" $(compgen -W "${options}" -- "${cur}"))
     fi
 
     return 0
-}
-# http://linux.die.net/man/1/bash
-complete -F _tmux tmux
+} &&
+    complete -F _tmux tmux
 
 # END tmux completion
