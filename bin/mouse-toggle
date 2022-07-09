@@ -50,7 +50,7 @@ case $1 in
 esac
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Required app check
-cmd_exists --error bash || exit 1
+cmd_exists --error bash tmux || exit 1
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # begin main app
 if [ -n "$TMUX" ]; then
