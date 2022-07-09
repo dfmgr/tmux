@@ -53,8 +53,8 @@ esac
 cmd_exists --error bash || exit 1
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # begin main app
-if [[ -n "$TMUX" ]]; then
-  if tmux show-options -gw mouse 2>&1 | grep -q off; then
+if [ -n "$TMUX" ]; then
+  if tmux show-options -gw mouse 2>/dev/null | grep -q on; then
     tmux set-option -gq mouse-utf8 off
     tmux set-option -gq mouse-resize-pane off
     tmux set-option -gq mouse-select-pane off
