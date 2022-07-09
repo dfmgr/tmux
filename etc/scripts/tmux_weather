@@ -35,7 +35,7 @@ __version() { echo "$VERSION"; }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set additional variables
-exitCode=""
+exitCode="0"
 TMUX_WEATHER_CONFIG_DIR="$HOME/.config/$APPNAME"
 TMUX_WEATHER_CONFIG_FILE="settings.conf"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -75,17 +75,19 @@ while :; do
 done
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main application
-if [ -f "$HOME/.cache/tmux_weather" ] && [ -s "$HOME/.cache/tmux_weather" ]; then
-  find "$HOME/.cache/tmux_weather" -daystart -maxdepth 1 -mmin +300 -type f -exec rm -f {} \;
-else
-  curl -q -ILSsf -m 1 --retry 1 "https://1.1.1.1" | grep -qi 'server:*.cloudflare' &&
-    curl -q -LSsf -m 1 https://wttr.in/?format=3 2>/dev/null | awk '{print $1,$(NF-1),$NF}' | sed 's|, |: |g' >"$HOME/.cache/tmux_weather" || echo ''
-  [ -f "$HOME/.cache/tmux_weather" ] &&
-    weather="$(cat "$HOME/.cache/tmux_weather")" &&
-    [ -n "$weather" ] &&
-    printf '%s' "$weather" || false
+if [ -f "$HOME/.cache/tmux_weather" ]; then
+  find "$HOME/.cache" -maxdepth 1 -mmin +300 -type f -name tmux_weather | grep '^' &&
+    rm -Rf "$HOME/.cache/tmux_weather"
+  exitCode=1
 fi
-exitCode="$?"
+if [ ! -s "$HOME/.cache/tmux_weather" ] && [ "$exitCode" -ne 0 ]; then
+  curl -q -ILSsf -m 1 --retry 1 "https://1.1.1.1" | grep -qi 'server:*.cloudflare' &&
+    curl -q -LSsf -m 1 "https://wttr.in/?format=3" 2>/dev/null | awk '{print $1,$(NF-1),$NF}' | sed 's|, |: |g' | grep '^' >"$HOME/.cache/tmux_weather" || echo ''
+fi
+if [ -f "$HOME/.cache/tmux_weather" ]; then
+  grep -s '^' "$HOME/.cache/tmux_weather"
+  exitCode="$?"
+fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # End application
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
