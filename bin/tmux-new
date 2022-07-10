@@ -73,7 +73,7 @@ __gen_config() {
     cp -Rf "$TMUX_NEW_CONFIG_DIR/$TMUX_NEW_CONFIG_FILE" "$TMUX_NEW_CONFIG_BACKUP_DIR/$TMUX_NEW_CONFIG_FILE.$$"
   cat <<EOF >"$TMUX_NEW_CONFIG_DIR/$TMUX_NEW_CONFIG_FILE"
 # Settings for tmux-new
-TMUX_NEW_TMUX_CONF="${TMUX_NEW_TMUX_CONF:-$TMUX_NEW_CONFIG_DIR}"
+TMUX_NEW_CONFIG_DIR="${TMUX_NEW_CONFIG_DIR:-$TMUX_NEW_CONFIG_DIR}"
 
 # Notification settings
 TMUX_NEW_GOOD_MESSAGE="${TMUX_NEW_GOOD_MESSAGE:-Everything Went OK}"
@@ -107,11 +107,11 @@ __cd() {
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __launch_tmux() {
   local name="$1"
-  [ -f "$TMUX_NEW_TMUX_CONF/$name.conf" ] || printf_exit "No config file found for $name"
+  [ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ] || printf_exit "No config file found for $name"
   # Start tmux
   if [[ -z "$TMUX" ]]; then
     sleep 3
-    tmux -f "$TMUX_NEW_TMUX_CONF/$name.conf" new-session -D -A -s $name 'tmux source-file '$TMUX_NEW_TMUX_CONF/$name.local''
+    tmux -f "$TMUX_NEW_CONFIG_DIR/$name.conf" new-session -D -A -s $name 'tmux source-file '$TMUX_NEW_CONFIG_DIR/$name.local''
     return $?
   else
     printf_exit "You appear to already have tmux running"
@@ -122,16 +122,16 @@ __tmux_conf() {
   local name="${1:-default}"
   local win_1="${2:-1}"
   local win_2="${3:-2}"
-  { [[ -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]] && [[ -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]]; } && return 0
+  { [[ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]] && [[ -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]]; } && return 0
   # Create main config files
-  printf_cyan "Creating $TMUX_NEW_TMUX_CONF/$name.conf"
-  if [[ -f "$CASJAYSDEVDIR/templates/tmux-new.conf" ]] && [[ ! -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]]; then
-    cp -Rf "$CASJAYSDEVDIR/templates/tmux-new.conf" "$TMUX_NEW_TMUX_CONF/$name.conf"
-    sed -i 's|TMUX_NEW_TMUX_CONF|'$TMUX_NEW_TMUX_CONF/$name'|g' "$TMUX_NEW_TMUX_CONF/$name.conf"
+  if [[ -f "$CASJAYSDEVDIR/templates/tmux-new.conf" ]] && [[ ! -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]]; then
+    printf_cyan "Creating $TMUX_NEW_CONFIG_DIR/$name.conf"
+    cp -Rf "$CASJAYSDEVDIR/templates/tmux-new.conf" "$TMUX_NEW_CONFIG_DIR/$name.conf"
+    sed -i 's|TMUX_NEW_CONFIG_DIR|'$TMUX_NEW_CONFIG_DIR/$name'|g' "$TMUX_NEW_CONFIG_DIR/$name.conf"
   fi
   # Create local config files
-  if [[ ! -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]] && [[ -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]]; then
-    printf_green "Creating tmux config file"
+  if [[ ! -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]] && [[ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]]; then
+    printf_green "Creating local tmux config file"
     __tmux_conf "$name"
     cat <<EOF >"$TMUX_NEW_CONFIG_DIR/$name.local"
 # start with 2 windows
@@ -140,7 +140,7 @@ neww -n $win_2   bash
 
 EOF
   fi
-  [[ -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]] &&
+  [[ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]] &&
     printf_blue "Config file has been created" ||
     printf_exit "Failed to create the config file"
 }
@@ -148,8 +148,8 @@ EOF
 __edit() {
   local name="$1"
   [[ -n "$EDITOR" ]] || printf_exit "EDITOR is not set"
-  [[ -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]] || printf_exit "Missing: $TMUX_NEW_TMUX_CONF/$name.conf"
-  eval $EDITOR "$TMUX_NEW_TMUX_CONF/$name.conf"
+  [[ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]] || printf_exit "Missing: $TMUX_NEW_CONFIG_DIR/$name.conf"
+  eval $EDITOR "$TMUX_NEW_CONFIG_DIR/$name.conf"
   return $?
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -174,7 +174,6 @@ TMUX_NEW_OUTPUT_COLOR_GOOD="${TMUX_NEW_OUTPUT_COLOR_GOOD:-2}"
 TMUX_NEW_OUTPUT_COLOR_ERROR="${TMUX_NEW_OUTPUT_COLOR_ERROR:-1}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Enviroment overrides
-TMUX_NEW_TMUX_CONF="${TMUX_NEW_TMUX_CONF:-$TMUX_NEW_CONFIG_DIR}"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Generate config files
