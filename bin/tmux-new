@@ -298,6 +298,7 @@ TMUX_NEW_FILE_CONF_LOCAL="${TMUX_NEW_FILE_CONF_LOCAL:-$TMUX_NEW_CONFIG_DIR/local
 [[ -d "$TMUX_NEW_CONFIG_DIR" ]] || mkdir -p "$TMUX_NEW_CONFIG_DIR"
 [[ -d "$TMUX_NEW_FILE_CONF" ]] || mkdir -p "$TMUX_NEW_FILE_CONF"
 [[ -d "$TMUX_NEW_FILE_WINDOWS" ]] || mkdir -p "$TMUX_NEW_FILE_WINDOWS"
+[[ -d "$TMUX_NEW_FILE_CONF_LOCAL" ]] || mkdir -p "$TMUX_NEW_FILE_CONF_LOCAL"
 [[ ! -f "$HOME/.config/tmux/templates/tmux-new.conf" ]] || cp -Rf "$HOME/.config/tmux/templates/tmux-new.conf" "$TMUX_NEW_FILE_CONF/template"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
