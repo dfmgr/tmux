@@ -123,13 +123,9 @@ __launch_tmux() {
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __tmux_conf() {
   local name="${1:-default}"
-  local win_1="${2:-1}"
-  local win_2="${3:-2}"
   if [[ -f "$TMUX_NEW_FILE_CONF/$name" ]] && [[ -f "$TMUX_NEW_FILE_WINDOWS/$name" ]]; then
     return 0
   fi
-  # copy template file
-  [[ -f "$HOME/.config/tmux/templates/tmux-new.conf" ]] && cp -Rf "$HOME/.config/tmux/templates/tmux-new.conf" "$TMUX_NEW_FILE_CONF/template"
   # Create main config files
   if [[ ! -f "$TMUX_NEW_FILE_CONF/$name" ]]; then
     printf_cyan "Creating $TMUX_NEW_FILE_CONF/$name"
@@ -140,18 +136,33 @@ __tmux_conf() {
       printf_blue "config file has been created" ||
       printf_exit "Failed to create config file"
   fi
-  # Create local config files
+  return
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Create tmux windows config files
+__create_windows() {
+  local name win_1_name win_1_cmd win_2_name win_2_cmd
+  name="${1:-default}"
+  win_1_def="${2}"
+  win_2_def="${3}"
+  # command
+  win_1_cmd="$(echo "$2" | awk -F':' '{print $1}' | grep '^')"
+  win_2_cmd="$(echo "$3" | awk -F':' '{print $1}' | grep '^')"
+  # name
+  win_1_name="$(echo "$2" | awk -F':' '{print $2}' | grep '^')"
+  win_2_name="$(echo "$3" | awk -F':' '{print $2}' | grep '^')"
+  #
   if [[ ! -f "$TMUX_NEW_FILE_WINDOWS/$name" ]]; then
     printf_green "Creating tmux windows file"
     cat <<EOF >"$TMUX_NEW_FILE_WINDOWS/$name"
 # start with 2 windows
-neww -n $win_1   bash
-neww -n $win_2   bash
+neww -n ${win_1_name:-$win_1_def}   ${win_1_cmd:-bash}
+neww -n ${win_2_name:-$win_2_def}   ${win_2_cmd:-bash}
 
 EOF
     [[ -f "$TMUX_NEW_FILE_WINDOWS/$name" ]] &&
-      printf_blue "local config file has been created" ||
-      printf_exit "Failed to create local config file"
+      printf_blue "tmux windows config file has been created" ||
+      printf_exit "Failed to create tmux windows config file"
   fi
   return
 }
@@ -287,6 +298,7 @@ TMUX_NEW_FILE_WINDOWS="${TMUX_NEW_FILE_WINDOWS:-$TMUX_NEW_CONFIG_DIR/windows}"
 [[ -d "$TMUX_NEW_CONFIG_DIR" ]] || mkdir -p "$TMUX_NEW_CONFIG_DIR"
 [[ -d "$TMUX_NEW_FILE_CONF" ]] || mkdir -p "$TMUX_NEW_FILE_CONF"
 [[ -d "$TMUX_NEW_FILE_WINDOWS" ]] || mkdir -p "$TMUX_NEW_FILE_WINDOWS"
+[[ ! -f "$HOME/.config/tmux/templates/tmux-new.conf" ]] || cp -Rf "$HOME/.config/tmux/templates/tmux-new.conf" "$TMUX_NEW_FILE_CONF/template"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # begin main app
@@ -294,36 +306,42 @@ case "$1" in
 build)
   shift 1
   __tmux_conf "build" "${1:-build}" "${2-:log}"
+  __create_windows "build" "${1:-build}" "${2-:log}"
   __launch_tmux "build"
   exit $?
   ;;
 ssh)
   shift 1
   __tmux_conf "ssh" "${1:-local}" "${2-:remote}"
+  __create_windows "ssh" "${1:-local}" "${2-:remote}"
   __launch_tmux "ssh"
   exit $?
   ;;
 dev)
   shift 1
   __tmux_conf "dev" "${1:-dev}" "${2-:test}"
+  __create_windows "dev" "${1:-dev}" "${2-:test}"
   __launch_tmux "dev"
   exit $?
   ;;
 node)
   shift 1
   __tmux_conf "node" "${1:-server}" "${2-:client}"
+  __create_windows "node" "${1:-server}" "${2-:client}"
   __launch_tmux "node"
   exit $?
   ;;
 test)
   shift 1
   __tmux_conf "test" "${1:-1}" "${2-:2}"
+  __create_windows "test" "${1:-1}" "${2-:2}"
   __launch_tmux "test"
   exit $?
   ;;
 default)
   shift 1
   __tmux_conf "default" "${1:-1}" "${2-:2}"
+  __create_windows "default" "${1:-1}" "${2-:2}"
   __launch_tmux "default"
   exit $?
   ;;
@@ -337,6 +355,7 @@ edit)
     exit 1
   fi
   __tmux_conf "$@"
+  __create_windows "$@"
   __launch_tmux "$1"
   exitCode=$?
   ;;
