@@ -106,7 +106,8 @@ __cd() {
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __launch_tmux() {
-  local name="$1" && shift 1
+  local name="$1"
+  [ -f "$TMUX_NEW_TMUX_CONF/$name.conf" ] || printf_exit "No config file found for $name"
   # Start tmux
   if [[ -z "$TMUX" ]]; then
     sleep 3
@@ -118,10 +119,10 @@ __launch_tmux() {
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __tmux_conf() {
-  local name="${1:-default}" && shift 1
-  local win_1="${1:-1}" && shift 1
-  local win_2="${1:-2}" && shift 1
-  [[ -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]] && return 0
+  local name="${1:-default}"
+  local win_1="${2:-1}"
+  local win_2="${3:-2}"
+  { [[ -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]] && [[ -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]]; } && return 0
   # Create main config files
   printf_cyan "Creating $TMUX_NEW_TMUX_CONF/$name.conf"
   if [[ -f "$CASJAYSDEVDIR/templates/tmux-new.conf" ]] && [[ ! -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]]; then
@@ -129,7 +130,7 @@ __tmux_conf() {
     sed -i 's|TMUX_NEW_TMUX_CONF|'$TMUX_NEW_TMUX_CONF/$name'|g' "$TMUX_NEW_TMUX_CONF/$name.conf"
   fi
   # Create local config files
-  if [[ ! -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]] && [[ ! -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]]; then
+  if [[ ! -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]] && [[ -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]]; then
     printf_green "Creating tmux config file"
     __tmux_conf "$name"
     cat <<EOF >"$TMUX_NEW_CONFIG_DIR/$name.local"
@@ -139,7 +140,9 @@ neww -n $win_2   bash
 
 EOF
   fi
-  [[ -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]] || printf_exit "Failed to create the config file"
+  [[ -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]] &&
+    printf_blue "Config file has been created" ||
+    printf_exit "Failed to create the config file"
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __edit() {
@@ -274,37 +277,37 @@ case "$1" in
 build)
   shift 1
   __tmux_conf "build" "${1:-build}" "${1-:log}"
-  __tmux_conf "build"
+  __launch_tmux "build"
   exit $?
   ;;
 ssh)
   shift 1
   __tmux_conf "ssh" "${1:-local}" "${1-:remote}"
-  __tmux_conf "ssh"
+  __launch_tmux "ssh"
   exit $?
   ;;
 dev)
   shift 1
   __tmux_conf "dev" "${1:-dev}" "${1-:test}"
-  __tmux_conf "dev"
+  __launch_tmux "dev"
   exit $?
   ;;
 node)
   shift 1
   __tmux_conf "node" "${1:-server}" "${1-:client}"
-  __tmux_conf "node"
+  __launch_tmux "node"
   exit $?
   ;;
 test)
   shift 1
   __tmux_conf "test" "${1:-1}" "${1-:2}"
-  __tmux_conf "test"
+  __launch_tmux "test"
   exit $?
   ;;
 default)
   shift 1
   __tmux_conf "default" "${1:-1}" "${1-:2}"
-  __tmux_conf "default"
+  __launch_tmux "default"
   exit $?
   ;;
 edit)
