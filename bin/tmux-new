@@ -121,27 +121,32 @@ __tmux_conf() {
   local win_1="${2:-1}"
   local win_2="${3:-2}"
   local CASJAYSDEVDIR="${CASJAYSDEVDIR:-/usr/local/share/CasjaysDev/scripts}"
-  { [[ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]] && [[ -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]]; } && return 0
+  if [[ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]] && [[ -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]]; then
+    return 0
+  fi
   # Create main config files
   if [[ -f "$CASJAYSDEVDIR/templates/tmux-new.conf" ]] && [[ ! -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]]; then
     printf_cyan "Creating $TMUX_NEW_CONFIG_DIR/$name.conf"
     cp -Rf "$CASJAYSDEVDIR/templates/tmux-new.conf" "$TMUX_NEW_CONFIG_DIR/$name.conf"
-    sed -i 's|TMUX_NEW_CONFIG_DIR|'$TMUX_NEW_CONFIG_DIR/$name'|g' "$TMUX_NEW_CONFIG_DIR/$name.conf"
+    sed -i 's|TMUX_NEW_TMUX_CONF.conf|'${TMUX_NEW_CONFIG_DIR}/${name}.conf'|g' "$TMUX_NEW_CONFIG_DIR/$name.conf"
+    [[ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]] &&
+      printf_blue "config file has been created" ||
+      printf_exit "Failed to create config file"
   fi
   # Create local config files
-  if [[ ! -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]] && [[ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]]; then
+  if [[ ! -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]]; then
     printf_green "Creating local tmux config file"
-    __tmux_conf "$name"
     cat <<EOF >"$TMUX_NEW_CONFIG_DIR/$name.local"
 # start with 2 windows
 neww -n $win_1   bash
 neww -n $win_2   bash
 
 EOF
+    [[ -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]] &&
+      printf_blue "local config file has been created" ||
+      printf_exit "Failed to create local config file"
   fi
-  [[ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]] &&
-    printf_blue "Config file has been created" ||
-    printf_exit "Failed to create the config file"
+  return
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __edit() {
@@ -318,7 +323,7 @@ edit)
     exit 1
   fi
   __tmux_conf "$@"
-  __launch_tmux $1
+  __launch_tmux "$1"
   exitCode=$?
   ;;
 esac
