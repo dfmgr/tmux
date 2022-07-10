@@ -8,7 +8,7 @@
 # @Copyright         :  Copyright: (c) 2022 Jason Hempstead, Casjays Developments
 # @Created           :  Friday, Jul 08, 2022 10:16 EDT
 # @File              :  tmux-new
-# @Description       :
+# @Description       :  Launch a new tmux session with config
 # @TODO              :
 # @Other             :
 # @Resource          :
@@ -39,10 +39,12 @@ fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # helper functions - See github.com/dfmgr/misc/bin/functions.bash
 __version() { app_version; }
-__list_options() { printf_custom "$1" "$2: $(echo ${3:-$ARRAY} | __sed 's|:||g;s|'$4'| '$5'|g')" 2>/dev/null; }
+__list_options() { printf_custom "$1" "$2: $(echo ${3:-$ARRAY} | sed 's|:||g;s|'$4'| '$5'|g')" 2>/dev/null; }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __help() {
-  app_help "4" "Usage: $PROG  [options] [name] [win1_name] [win2_name]" \
+  app_help \
+    '# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -' \
+    "Usage: $PROG  [options] [name] [win1_name] [win2_name]" \
     "$PROG create                 -  create a config file" \
     "$PROG edit                   -  edit config file" \
     "$PROG ssh                    -  enviroment for ssh" \
@@ -51,6 +53,8 @@ __help() {
     "$PROG node                   -  enviroment for node projects" \
     "$PROG test                   -  enviroment for testing" \
     "$PROG default                -  plain enviroment" \
+    "# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" \
+    "Options" \
     "$PROG --dir                  -  display help" \
     "$PROG --config               -  create config file" \
     "$PROG --debug                -  change shell" \
@@ -129,7 +133,7 @@ __tmux_conf() {
   if [[ -f "$TMUX_NEW_CONFIG_DIR/tmux-new.conf" ]] && [[ ! -f "$TMUX_NEW_FILE_CONF/$name" ]]; then
     printf_cyan "Creating $TMUX_NEW_FILE_CONF/$name"
     cp -Rf "$TMUX_NEW_CONFIG_DIR/tmux-new.conf" "$TMUX_NEW_FILE_CONF/$name"
-    sed -i 's|TMUX_NEW_CONF_FILE|'${TMUX_NEW_CONFIG_DIR}/${name}'|g' "$TMUX_NEW_FILE_CONF/$name"
+    sed -i 's|TMUX_NEW_CONF_FILE|'${TMUX_NEW_FILE_CONF}/${name}'|g' "$TMUX_NEW_FILE_CONF/$name"
     [[ -f "$TMUX_NEW_FILE_CONF/$name" ]] &&
       printf_blue "config file has been created" ||
       printf_exit "Failed to create config file"
@@ -152,10 +156,9 @@ EOF
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __edit() {
   local name="$1"
-  local TMUX_NEW_CONFIG_DIR="$TMUX_NEW_CONFIG_DIR"
   [[ -n "$EDITOR" ]] || printf_exit "EDITOR is not set"
   [[ -f "$TMUX_NEW_FILE_CONF/$name" ]] || printf_exit "Missing: $TMUX_NEW_FILE_CONF/$name"
-  eval $EDITOR "$TMUX_NEW_FILE_CONF/$name"
+  eval $EDITOR "$TMUX_NEW_FILE_CONF/$name" "$TMUX_NEW_FILE_LOCAL/$name"
   return $?
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
