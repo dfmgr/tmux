@@ -115,7 +115,7 @@ __launch_tmux() {
   # Start tmux
   if [[ -z "$TMUX" ]]; then
     sleep 3
-    tmux -f "$TMUX_NEW_FILE_CONF/$name" new-session -D -A -s $name 'tmux source-file '$TMUX_NEW_FILE_WINDOWS/$name''
+    tmux -f "$TMUX_NEW_FILE_CONF/$name" new-session -D -A -s $name 'tmux source-file '$TMUX_NEW_FILE_WINDOWS/$name'' 2>/dev/null
     return $?
   else
     printf_exit "You appear to already have tmux running"
@@ -159,8 +159,8 @@ __create_windows() {
     printf_green "Creating tmux windows file"
     cat <<EOF >"$TMUX_NEW_FILE_WINDOWS/$name"
 # start with 2 windows
-neww -n ${win_1_name}   ${win_1_cmd}
-neww -n ${win_2_name}   ${win_2_cmd}
+neww -n ${win_1_name}  bash -c "${win_1_cmd}"
+neww -n ${win_2_name}  bash -c "${win_2_cmd}"
 
 EOF
     [[ -f "$TMUX_NEW_FILE_WINDOWS/$name" ]] &&
