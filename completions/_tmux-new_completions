@@ -21,7 +21,7 @@ _tmux-new() {
   local prev="${COMP_WORDS[$COMP_CWORD - 1]}"
   local CONFFILE="settings.conf"
   local SEARCHDIR="$HOME/.config/misc/settings/tmux-new"
-  local SEARCHCMD="$(___findcmd "$SEARCHDIR/conf/" "f" "1" | grep -v template | sort -u)"
+  local SEARCHCMD="$(___findcmd "$SEARCHDIR/conf/" "f" "1" | sort -u)"
   local SHOW_COMP_OPTS=""
   local FILEDIR=""
   local OPTS=""
