@@ -105,11 +105,11 @@ __cd() {
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __launch_tmux() {
   local name="$1"
-  [ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ] || printf_exit "No config file found for $name"
+  [ -f "$TMUX_NEW_FILE_CONF" ] || printf_exit "No config file found for $name"
   # Start tmux
   if [[ -z "$TMUX" ]]; then
     sleep 3
-    tmux -f "$TMUX_NEW_CONFIG_DIR/$name.conf" new-session -D -A -s $name 'tmux source-file '$TMUX_NEW_CONFIG_DIR/$name.local''
+    tmux -f "$TMUX_NEW_FILE_CONF" new-session -D -A -s $name 'tmux source-file '$TMUX_NEW_FILE_LOCAL''
     return $?
   else
     printf_exit "You appear to already have tmux running"
@@ -120,28 +120,30 @@ __tmux_conf() {
   local name="${1:-default}"
   local win_1="${2:-1}"
   local win_2="${3:-2}"
-  if [[ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]] && [[ -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]]; then
+  [[ -d "$TMUX_NEW_CONFIG_DIR/conf" ]] || mkdir -p "$TMUX_NEW_CONFIG_DIR/conf"
+  [[ -d "$TMUX_NEW_CONFIG_DIR/local" ]] || mkdir -p "$TMUX_NEW_CONFIG_DIR/local"
+  if [[ -f "$TMUX_NEW_FILE_CONF" ]] && [[ -f "$TMUX_NEW_FILE_LOCAL" ]]; then
     return 0
   fi
   # Create main config files
-  if [[ -f "$TMUX_NEW_CONFIG_DIR/tmux-new.conf" ]] && [[ ! -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]]; then
-    printf_cyan "Creating $TMUX_NEW_CONFIG_DIR/$name.conf"
-    cp -Rf "$TMUX_NEW_CONFIG_DIR/tmux-new.conf" "$TMUX_NEW_CONFIG_DIR/$name.conf"
-    sed -i 's|TMUX_NEW_CONF_FILE|'${TMUX_NEW_CONFIG_DIR}/${name}'|g' "$TMUX_NEW_CONFIG_DIR/$name.conf"
-    [[ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]] &&
+  if [[ -f "$TMUX_NEW_CONFIG_DIR/tmux-new.conf" ]] && [[ ! -f "$TMUX_NEW_FILE_CONF" ]]; then
+    printf_cyan "Creating $TMUX_NEW_FILE_CONF"
+    cp -Rf "$TMUX_NEW_CONFIG_DIR/tmux-new.conf" "$TMUX_NEW_FILE_CONF"
+    sed -i 's|TMUX_NEW_CONF_FILE|'${TMUX_NEW_CONFIG_DIR}/${name}'|g' "$TMUX_NEW_FILE_CONF"
+    [[ -f "$TMUX_NEW_FILE_CONF" ]] &&
       printf_blue "config file has been created" ||
       printf_exit "Failed to create config file"
   fi
   # Create local config files
-  if [[ ! -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]]; then
+  if [[ ! -f "$TMUX_NEW_FILE_LOCAL" ]]; then
     printf_green "Creating local tmux config file"
-    cat <<EOF >"$TMUX_NEW_CONFIG_DIR/$name.local"
+    cat <<EOF >"$TMUX_NEW_FILE_LOCAL"
 # start with 2 windows
 neww -n $win_1   bash
 neww -n $win_2   bash
 
 EOF
-    [[ -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]] &&
+    [[ -f "$TMUX_NEW_FILE_LOCAL" ]] &&
       printf_blue "local config file has been created" ||
       printf_exit "Failed to create local config file"
   fi
@@ -150,9 +152,12 @@ EOF
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __edit() {
   local name="$1"
+  local TMUX_NEW_CONFIG_DIR="$TMUX_NEW_CONFIG_DIR"
+  local TMUX_NEW_FILE_CONF="$TMUX_NEW_CONFIG_DIR/conf/$name"
+  local TMUX_NEW_FILE_LOCAL="$TMUX_NEW_CONFIG_DIR/local/$name"
   [[ -n "$EDITOR" ]] || printf_exit "EDITOR is not set"
-  [[ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]] || printf_exit "Missing: $TMUX_NEW_CONFIG_DIR/$name.conf"
-  eval $EDITOR "$TMUX_NEW_CONFIG_DIR/$name.conf"
+  [[ -f "$TMUX_NEW_FILE_CONF" ]] || printf_exit "Missing: $TMUX_NEW_FILE_CONF"
+  eval $EDITOR "$TMUX_NEW_FILE_CONF"
   return $?
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -269,6 +274,8 @@ cmd_exists --error --ask bash tmux || exit 1 # exit 1 if not found
 #__am_i_online --error || exit 1     # exit 1 if no internet
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # APP Variables overrides
+TMUX_NEW_FILE_CONF="$TMUX_NEW_CONFIG_DIR/conf/$name"
+TMUX_NEW_FILE_LOCAL="$TMUX_NEW_CONFIG_DIR/local/$name"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Actions based on env
