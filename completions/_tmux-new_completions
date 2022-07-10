@@ -14,15 +14,14 @@
 # @Resource          :
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -'
 _tmux-new() {
-  ___findcmd() { find -L "${1:-$CONFDIR/}" -maxdepth ${3:-3} -type ${2:-f} 2>/dev/null | sed 's#'${1:-$CONFDIR}'##g' | grep '^' || return 1; }
+  ___findcmd() { find -L "${1:-$SEARCHDIR/}" -maxdepth ${3:-3} -type ${2:-f} 2>/dev/null | sed 's#'${1:-$CONFDIR}'##g' | grep '^' || return 1; }
   local CASJAYSDEVDIR="${CASJAYSDEVDIR:-/usr/local/share/CasjaysDev/scripts}"
   local cur prev words cword opts split
   local cur="${COMP_WORDS[$COMP_CWORD]}"
   local prev="${COMP_WORDS[$COMP_CWORD - 1]}"
   local CONFFILE="settings.conf"
-  local CONFDIR="$HOME/.config/myscripts/tmux-new"
-  local SEARCHDIR="${CONFDIR:-$HOME/.config/myscripts/tmux-new}"
-  local SEARCHCMD="$(___findcmd "$SEARCHDIR/" "f" "1" | sort -u)"
+  local SEARCHDIR="$HOME/.config/misc/settings/tmux-new"
+  local SEARCHCMD="$(___findcmd "$SEARCHDIR/conf/" "f" "1" | grep -v template | sort -u)"
   local SHOW_COMP_OPTS=""
   local FILEDIR=""
   local OPTS=""
