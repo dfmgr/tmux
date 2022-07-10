@@ -25,27 +25,43 @@ SRC_DIR="${BASH_SOURCE%/*}"
 if [[ "$1" == "--debug" ]]; then shift 1 && set -xo pipefail && export SCRIPT_OPTS="--debug" && export _DEBUG="on"; fi
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Import functions
-CASJAYSDEVDIR="${CASJAYSDEVDIR:-/usr/local/share/CasjaysDev/scripts}"
-SCRIPTSFUNCTDIR="${CASJAYSDEVDIR:-/usr/local/share/CasjaysDev/scripts}/functions"
-SCRIPTSFUNCTFILE="${SCRIPTSAPPFUNCTFILE:-testing.bash}"
-SCRIPTSFUNCTURL="${SCRIPTSAPPFUNCTURL:-https://github.com/dfmgr/installer/raw/main/functions}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-if [ -f "$PWD/$SCRIPTSFUNCTFILE" ]; then
-  . "$PWD/$SCRIPTSFUNCTFILE"
-elif [ -f "$SCRIPTSFUNCTDIR/$SCRIPTSFUNCTFILE" ]; then
-  . "$SCRIPTSFUNCTDIR/$SCRIPTSFUNCTFILE"
+# Main function file
+if [[ -f "$SRC_DIR/functions.bash" ]]; then
+  FUNCTIONS_DIR="$SRC_DIR"
+  . "$FUNCTIONS_DIR/functions.bash"
+elif [[ -f "$HOME/.local/bin/functions.bash" ]]; then
+  FUNCTIONS_DIR="$HOME/.local/bin"
+  . "$FUNCTIONS_DIR/functions.bash"
 else
-  echo "Can not load the functions file: $SCRIPTSFUNCTDIR/$SCRIPTSFUNCTFILE" 1>&2
-  exit 1
+  printf "\t\t\033[0;31m%s \033[0m\n" "Couldn't source the functions file from $FUNCTIONS_DIR"
+  return 1
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# user system devenv dfmgr dockermgr fontmgr iconmgr pkmgr systemmgr thememgr wallpapermgr
-system_install
-__options "$@"
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Set functions
+# helper functions - See github.com/dfmgr/misc/bin/functions.bash
+__version() { app_version; }
 __list_options() { printf_custom "$1" "$2: $(echo ${3:-$ARRAY} | __sed 's|:||g;s|'$4'| '$5'|g')" 2>/dev/null; }
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+__help() {
+  app_help "4" "Usage: $PROG  [options] [name] [win1_name] [win2_name]" \
+    "$PROG create                 -  create a config file" \
+    "$PROG edit                   -  edit config file" \
+    "$PROG ssh                    -  enviroment for ssh" \
+    "$PROG build                  -  enviroment for building" \
+    "$PROG dev                    -  enviroment for development" \
+    "$PROG node                   -  enviroment for node projects" \
+    "$PROG test                   -  enviroment for testing" \
+    "$PROG default                -  plain enviroment" \
+    "$PROG --dir                  -  display help" \
+    "$PROG --config               -  create config file" \
+    "$PROG --debug                -  change shell" \
+    "$PROG --version              -  display version" \
+    "$PROG --help                 -  display help" \
+    "$PROG --help                 -  display help" \
+    "$PROG --options              -  used by completions"
+  exit $?
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __gen_config() {
   [[ -z "$NOTIFY_CLIENT_NAME" ]] || NOTIFY_CLIENT_NAME=""
@@ -83,34 +99,55 @@ EOF
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Additional functions
-__launch_tmux() {
-  # Set variables
-  local session="${1:-default}"
-  local name="$session"
-  # Create config files
-  if [[ ! -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]] && [[ ! -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]]; then
-    printf_green "Creating tmux config file"
-    __tmux_conf "$name"
-    cat <<EOF >"$TMUX_NEW_CONFIG_DIR/$name.local"
-# start with 2 windows
-neww -n buildx bash
-neww -n tailf  bash
-
-EOF
-  fi
-  # Start tmux
-  sleep 3
-  tmux -f "$TMUX_NEW_TMUX_CONF/$name.conf" new-session -D -A -s $name 'tmux source-file '$TMUX_NEW_TMUX_CONF/$name.local''
-  return $?
+__cd() {
+  TMUX_NEW_CWD="${1:-$TMUX_NEW_CWD}"
+  [[ -d "$TMUX_NEW_CWD" ]] || mkdir -p "$TMUX_NEW_CWD"
+  builtin cd "$TMUX_NEW_CWD" || return 1
 }
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+__launch_tmux() {
+  local name="$1" && shift 1
+  # Start tmux
+  if [[ -z "$TMUX" ]]; then
+    sleep 3
+    tmux -f "$TMUX_NEW_TMUX_CONF/$name.conf" new-session -D -A -s $name 'tmux source-file '$TMUX_NEW_TMUX_CONF/$name.local''
+    return $?
+  else
+    printf_exit "You appear to already have tmux running"
+  fi
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __tmux_conf() {
-  local name="$1"
+  local name="${1:-default}" && shift 1
+  local win_1="${1:-1}" && shift 1
+  local win_2="${1:-2}" && shift 1
+  [[ -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]] && return 0
+  # Create main config files
   printf_cyan "Creating $TMUX_NEW_TMUX_CONF/$name.conf"
   if [[ -f "$CASJAYSDEVDIR/templates/tmux-new.conf" ]] && [[ ! -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]]; then
     cp -Rf "$CASJAYSDEVDIR/templates/tmux-new.conf" "$TMUX_NEW_TMUX_CONF/$name.conf"
     sed -i 's|TMUX_NEW_TMUX_CONF|'$TMUX_NEW_TMUX_CONF/$name'|g' "$TMUX_NEW_TMUX_CONF/$name.conf"
   fi
-  [[ -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]] || printf_red "Failed to create the config file"
+  # Create local config files
+  if [[ ! -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]] && [[ ! -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]]; then
+    printf_green "Creating tmux config file"
+    __tmux_conf "$name"
+    cat <<EOF >"$TMUX_NEW_CONFIG_DIR/$name.local"
+# start with 2 windows
+neww -n $win_1   bash
+neww -n $win_2   bash
+
+EOF
+  fi
+  [[ -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]] || printf_exit "Failed to create the config file"
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+__edit() {
+  local name="$1"
+  [[ -n "$EDITOR" ]] || printf_exit "EDITOR is not set"
+  [[ -f "$TMUX_NEW_TMUX_CONF/$name.conf" ]] || printf_exit "Missing: $TMUX_NEW_TMUX_CONF/$name.conf"
+  eval $EDITOR "$TMUX_NEW_TMUX_CONF/$name.conf"
+  return $?
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Default variables
@@ -174,7 +211,7 @@ fi
 SETARGS="$*"
 SHORTOPTS=""
 LONGOPTS="debug,options,config,version,help,dir:"
-ARRAY="build"
+ARRAY="create build ssh dev node test edit default"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Setup application options
 setopts=$(getopt -o "$SHORTOPTS" --long "$LONGOPTS" -a -n "$(basename "$0" 2>/dev/null)" -- "$@" 2>/dev/null)
@@ -230,17 +267,58 @@ cmd_exists --error --ask bash tmux || exit 1 # exit 1 if not found
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Actions based on env
-
+[[ -n "$TMUX_NEW_CWD" ]] && __cd "$TMUX_NEW_CWD"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # begin main app
 case "$1" in
 build)
   shift 1
-  __launch_tmux build "$@"
-  exitCode=$?
+  __tmux_conf "build" "${1:-build}" "${1-:log}"
+  __tmux_conf "build"
+  exit $?
+  ;;
+ssh)
+  shift 1
+  __tmux_conf "ssh" "${1:-local}" "${1-:remote}"
+  __tmux_conf "ssh"
+  exit $?
+  ;;
+dev)
+  shift 1
+  __tmux_conf "dev" "${1:-dev}" "${1-:test}"
+  __tmux_conf "dev"
+  exit $?
+  ;;
+node)
+  shift 1
+  __tmux_conf "node" "${1:-server}" "${1-:client}"
+  __tmux_conf "node"
+  exit $?
+  ;;
+test)
+  shift 1
+  __tmux_conf "test" "${1:-1}" "${1-:2}"
+  __tmux_conf "test"
+  exit $?
+  ;;
+default)
+  shift 1
+  __tmux_conf "default" "${1:-1}" "${1-:2}"
+  __tmux_conf "default"
+  exit $?
+  ;;
+edit)
+  shift 1
+
   ;;
 *)
-  [[ $# -eq 0 ]] && printf_exit "Usage: $APPNAME [options] [$ARRAY]"
+  if [[ $# -eq 0 ]]; then
+    printf_red "Usage: $APPNAME [options] [name] [win1_name] [win2_name]"
+    exit 1
+  fi
+  __tmux_conf "$@"
+  __launch_tmux $1
+  exitCode=$?
   ;;
 esac
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
