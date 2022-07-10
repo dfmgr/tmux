@@ -146,18 +146,18 @@ __create_windows() {
   win_1_def="${2}"
   win_2_def="${3}"
   # name
-  win_1_name="$(echo "$win_1_def" | grep ':' | awk -F':' '{print $2}' | grep '^')"
-  win_2_name="$(echo "$win_2_def" | grep ':' | awk -F':' '{print $2}' | grep '^')"
+  win_1_name="$(echo "$win_1_def" | grep ':' | awk -F':' '{print $2}' | grep '^' || echo "$win_1_def")"
+  win_2_name="$(echo "$win_2_def" | grep ':' | awk -F':' '{print $2}' | grep '^' || echo "$win_2_def")"
   # command
-  win_1_cmd="$(echo "$win_1_def" | grep ':' | awk -F':' '{print $1}' | grep '^')"
-  win_2_cmd="$(echo "$win_2_def" | grep ':' | awk -F':' '{print $1}' | grep '^')"
+  win_1_cmd="$(echo "$win_1_def" | grep ':' | awk -F':' '{print $1}' | grep '^' || echo 'bash')"
+  win_2_cmd="$(echo "$win_2_def" | grep ':' | awk -F':' '{print $1}' | grep '^' || echo 'bash')"
   #
   if [[ ! -f "$TMUX_NEW_FILE_WINDOWS/$name" ]]; then
     printf_green "Creating tmux windows file"
     cat <<EOF >"$TMUX_NEW_FILE_WINDOWS/$name"
 # start with 2 windows
-neww -n ${win_1_name:-$win_1_def}   ${win_1_cmd:-bash}
-neww -n ${win_2_name:-$win_2_def}   ${win_2_cmd:-bash}
+neww -n ${win_1_name}   ${win_1_cmd}
+neww -n ${win_2_name}   ${win_2_cmd}
 
 EOF
     [[ -f "$TMUX_NEW_FILE_WINDOWS/$name" ]] &&
