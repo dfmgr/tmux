@@ -120,6 +120,8 @@ __tmux_conf() {
   local name="${1:-default}"
   local win_1="${2:-1}"
   local win_2="${3:-2}"
+  TMUX_NEW_FILE_CONF="$TMUX_NEW_CONFIG_DIR/conf/$name"
+  TMUX_NEW_FILE_LOCAL="$TMUX_NEW_CONFIG_DIR/local/$name"
   [[ -d "$TMUX_NEW_CONFIG_DIR/conf" ]] || mkdir -p "$TMUX_NEW_CONFIG_DIR/conf"
   [[ -d "$TMUX_NEW_CONFIG_DIR/local" ]] || mkdir -p "$TMUX_NEW_CONFIG_DIR/local"
   if [[ -f "$TMUX_NEW_FILE_CONF" ]] && [[ -f "$TMUX_NEW_FILE_LOCAL" ]]; then
@@ -153,8 +155,6 @@ EOF
 __edit() {
   local name="$1"
   local TMUX_NEW_CONFIG_DIR="$TMUX_NEW_CONFIG_DIR"
-  local TMUX_NEW_FILE_CONF="$TMUX_NEW_CONFIG_DIR/conf/$name"
-  local TMUX_NEW_FILE_LOCAL="$TMUX_NEW_CONFIG_DIR/local/$name"
   [[ -n "$EDITOR" ]] || printf_exit "EDITOR is not set"
   [[ -f "$TMUX_NEW_FILE_CONF" ]] || printf_exit "Missing: $TMUX_NEW_FILE_CONF"
   eval $EDITOR "$TMUX_NEW_FILE_CONF"
@@ -274,8 +274,6 @@ cmd_exists --error --ask bash tmux || exit 1 # exit 1 if not found
 #__am_i_online --error || exit 1     # exit 1 if no internet
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # APP Variables overrides
-TMUX_NEW_FILE_CONF="$TMUX_NEW_CONFIG_DIR/conf/$name"
-TMUX_NEW_FILE_LOCAL="$TMUX_NEW_CONFIG_DIR/local/$name"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Actions based on env
