@@ -130,8 +130,8 @@ __tmux_conf() {
   if [[ ! -f "$TMUX_NEW_FILE_CONF/$name" ]]; then
     printf_cyan "Creating $TMUX_NEW_FILE_CONF/$name"
     cp -Rf "$TMUX_NEW_FILE_CONF/template" "$TMUX_NEW_FILE_CONF/$name"
-    sed -i 's|TMUX_NEW_CONF_FILE|'${TMUX_NEW_FILE_CONF}/${name}'|g' "$TMUX_NEW_FILE_CONF/$name"
     sed -i 's|TMUX_NEW_CONF_FILE_LOCAL|'${TMUX_NEW_FILE_CONF_LOCAL}/${name}'|g' "$TMUX_NEW_FILE_CONF_LOCAL/$name"
+    sed -i 's|TMUX_NEW_CONF_FILE|'${TMUX_NEW_FILE_CONF}/${name}'|g' "$TMUX_NEW_FILE_CONF/$name"
     [[ -f "$TMUX_NEW_FILE_CONF/$name" ]] &&
       printf_blue "config file has been created" ||
       printf_exit "Failed to create config file"
@@ -289,8 +289,8 @@ cmd_exists --error --ask bash tmux || exit 1 # exit 1 if not found
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # APP Variables overrides
 TMUX_NEW_FILE_CONF="${TMUX_NEW_FILE_CONF:-$TMUX_NEW_CONFIG_DIR/conf}"
-TMUX_NEW_FILE_CONF_LOCAL="${TMUX_NEW_FILE_CONF:-$TMUX_NEW_CONFIG_DIR/local}"
 TMUX_NEW_FILE_WINDOWS="${TMUX_NEW_FILE_WINDOWS:-$TMUX_NEW_CONFIG_DIR/windows}"
+TMUX_NEW_FILE_CONF_LOCAL="${TMUX_NEW_FILE_CONF_LOCAL:-$TMUX_NEW_CONFIG_DIR/local}"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Actions based on env
