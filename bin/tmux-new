@@ -145,12 +145,12 @@ __create_windows() {
   name="${1:-default}"
   win_1_def="${2}"
   win_2_def="${3}"
-  # command
-  win_1_cmd="$(echo "$2" | awk -F':' '{print $1}' | grep '^')"
-  win_2_cmd="$(echo "$3" | awk -F':' '{print $1}' | grep '^')"
   # name
-  win_1_name="$(echo "$2" | awk -F':' '{print $2}' | grep '^')"
-  win_2_name="$(echo "$3" | awk -F':' '{print $2}' | grep '^')"
+  win_1_name="$(echo "$win_1_def" | grep ':' | awk -F':' '{print $2}' | grep '^')"
+  win_2_name="$(echo "$win_2_def" | grep ':' | awk -F':' '{print $2}' | grep '^')"
+  # command
+  win_1_cmd="$(echo "$win_1_def" | grep ':' | awk -F':' '{print $1}' | grep '^')"
+  win_2_cmd="$(echo "$win_2_def" | grep ':' | awk -F':' '{print $1}' | grep '^')"
   #
   if [[ ! -f "$TMUX_NEW_FILE_WINDOWS/$name" ]]; then
     printf_green "Creating tmux windows file"
