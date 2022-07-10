@@ -113,7 +113,7 @@ __launch_tmux() {
   # Start tmux
   if [[ -z "$TMUX" ]]; then
     sleep 3
-    tmux -f "$TMUX_NEW_FILE_CONF/$name" new-session -D -A -s $name 'tmux source-file '$TMUX_NEW_FILE_LOCAL''
+    tmux -f "$TMUX_NEW_FILE_CONF/$name" new-session -D -A -s $name 'tmux source-file '$TMUX_NEW_FILE_LOCAL/$name''
     return $?
   else
     printf_exit "You appear to already have tmux running"
@@ -128,7 +128,6 @@ __tmux_conf() {
     return 0
   fi
   # Create main config files
-  set -x
   if [[ -f "$HOME/.config/tmux/tmux-new.conf" ]] && [[ ! -f "$TMUX_NEW_FILE_CONF/$name" ]]; then
     printf_cyan "Creating $TMUX_NEW_FILE_CONF/$name"
     cp -Rf "$HOME/.config/tmux/tmux-new.conf" "$TMUX_NEW_FILE_CONF/$name"
@@ -137,7 +136,6 @@ __tmux_conf() {
       printf_blue "config file has been created" ||
       printf_exit "Failed to create config file"
   fi
-  set +x
   # Create local config files
   if [[ ! -f "$TMUX_NEW_FILE_LOCAL/$name" ]]; then
     printf_green "Creating local tmux config file"
