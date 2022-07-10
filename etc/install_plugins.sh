@@ -31,10 +31,10 @@ TMUX_PLUGIN_MANAGER_PATH="${TMUX_PLUGIN_MANAGER_PATH:-$TMUX_SHARE_DIR/tpm}"
 export TMUX_HOME TMUX_PLUGIN_MANAGER_PATH TMUX_SHARE_DIR
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 [[ -d "$TMUX_PLUGIN_MANAGER_PATH/.git" ]] && git -C "$TMUX_PLUGIN_MANAGER_PATH" pull ||
-  git clone https://github.com/tmux-plugins/tpm "$TMUX_PLUGIN_MANAGER_PATH"
+  git clone "https://github.com/tmux-plugins/tpm" "$TMUX_PLUGIN_MANAGER_PATH"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 [ -x "$TMUX_PLUGIN_MANAGER_PATH/bin/install_plugins" ] &&
-  $TMUX_PLUGIN_MANAGER_PATH/bin/install_plugins
+  "$TMUX_PLUGIN_MANAGER_PATH/bin/install_plugins"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 mkdir -p "$TMUX_SHARE_DIR/resurrect"
 [[ -f "$TMUX_HOME/resurrect" ]] &&
