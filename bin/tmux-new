@@ -120,15 +120,14 @@ __tmux_conf() {
   local name="${1:-default}"
   local win_1="${2:-1}"
   local win_2="${3:-2}"
-  local CASJAYSDEVDIR="${CASJAYSDEVDIR:-/usr/local/share/CasjaysDev/scripts}"
   if [[ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]] && [[ -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]]; then
     return 0
   fi
   # Create main config files
-  if [[ -f "$CASJAYSDEVDIR/templates/tmux-new.conf" ]] && [[ ! -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]]; then
+  if [[ -f "$TMUX_NEW_CONFIG_DIR/tmux-new.conf" ]] && [[ ! -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]]; then
     printf_cyan "Creating $TMUX_NEW_CONFIG_DIR/$name.conf"
-    cp -Rf "$CASJAYSDEVDIR/templates/tmux-new.conf" "$TMUX_NEW_CONFIG_DIR/$name.conf"
-    sed -i 's|TMUX_NEW_TMUX_CONF.conf|'${TMUX_NEW_CONFIG_DIR}/${name}.conf'|g' "$TMUX_NEW_CONFIG_DIR/$name.conf"
+    cp -Rf "$TMUX_NEW_CONFIG_DIR/tmux-new.conf" "$TMUX_NEW_CONFIG_DIR/$name.conf"
+    sed -i 's|TMUX_NEW_CONF_FILE|'${TMUX_NEW_CONFIG_DIR}/${name}'|g' "$TMUX_NEW_CONFIG_DIR/$name.conf"
     [[ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]] &&
       printf_blue "config file has been created" ||
       printf_exit "Failed to create config file"
