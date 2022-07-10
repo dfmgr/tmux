@@ -110,6 +110,7 @@ __cd() {
 __launch_tmux() {
   local name="$1"
   [ -f "$TMUX_NEW_FILE_CONF/$name" ] || printf_exit "No config file found for $name"
+  [ -f "$TMUX_NEW_FILE_WINDOWS/$name" ] || printf_exit "No windows config file found for $name"
   # Start tmux
   if [[ -z "$TMUX" ]]; then
     sleep 3
@@ -127,10 +128,12 @@ __tmux_conf() {
   if [[ -f "$TMUX_NEW_FILE_CONF/$name" ]] && [[ -f "$TMUX_NEW_FILE_WINDOWS/$name" ]]; then
     return 0
   fi
+  # copy template file
+  [[ -f "$HOME/.config/tmux/templates/tmux-new.conf" ]] && cp -Rf "$HOME/.config/tmux/templates/tmux-new.conf" "$TMUX_NEW_FILE_CONF/template"
   # Create main config files
-  if [[ -f "$HOME/.config/tmux/tmux-new.conf" ]] && [[ ! -f "$TMUX_NEW_FILE_CONF/$name" ]]; then
+  if [[ ! -f "$TMUX_NEW_FILE_CONF/$name" ]]; then
     printf_cyan "Creating $TMUX_NEW_FILE_CONF/$name"
-    cp -Rf "$HOME/.config/tmux/tmux-new.conf" "$TMUX_NEW_FILE_CONF/$name"
+    cp -Rf "$TMUX_NEW_FILE_CONF/template" "$TMUX_NEW_FILE_CONF/$name"
     sed -i 's|TMUX_NEW_CONF_FILE|'${TMUX_NEW_FILE_CONF}/${name}'|g' "$TMUX_NEW_FILE_CONF/$name"
     sed -i 's|TMUX_NEW_CONF_FILE_LOCAL|'${TMUX_NEW_FILE_CONF_LOCAL}/${name}'|g' "$TMUX_NEW_FILE_CONF_LOCAL/$name"
     [[ -f "$TMUX_NEW_FILE_CONF/$name" ]] &&
