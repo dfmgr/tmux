@@ -159,8 +159,8 @@ __create_windows() {
     printf_green "Creating tmux windows file"
     cat <<EOF >"$TMUX_NEW_FILE_WINDOWS/$name"
 # start with 2 windows
-neww -n ${win_1_name}  bash -c "${win_1_cmd}"
-neww -n ${win_2_name}  bash -c "${win_2_cmd}"
+neww -n ${win_1_name}  bash -c "${win_1_cmd};bash"
+neww -n ${win_2_name}  bash -c "${win_2_cmd};bash"
 
 EOF
     [[ -f "$TMUX_NEW_FILE_WINDOWS/$name" ]] &&
