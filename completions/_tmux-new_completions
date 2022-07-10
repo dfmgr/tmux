@@ -79,6 +79,8 @@ _tmux-new() {
       ;;
     build | ssh | dev | node | test | edit | default)
       shift 1
+      compopt -o nospace
+      COMPREPLY=($(compgen -W '' -- "${cur}"))
       ;;
     *)
       COMPREPLY=($(compgen -W '$ARRAY' -- "${cur}"))
