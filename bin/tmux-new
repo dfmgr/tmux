@@ -293,37 +293,37 @@ TMUX_NEW_FILE_WINDOWS="${TMUX_NEW_FILE_WINDOWS:-$TMUX_NEW_CONFIG_DIR/windows}"
 case "$1" in
 build)
   shift 1
-  __tmux_conf "build" "${1:-build}" "${1-:log}"
+  __tmux_conf "build" "${1:-build}" "${2-:log}"
   __launch_tmux "build"
   exit $?
   ;;
 ssh)
   shift 1
-  __tmux_conf "ssh" "${1:-local}" "${1-:remote}"
+  __tmux_conf "ssh" "${1:-local}" "${2-:remote}"
   __launch_tmux "ssh"
   exit $?
   ;;
 dev)
   shift 1
-  __tmux_conf "dev" "${1:-dev}" "${1-:test}"
+  __tmux_conf "dev" "${1:-dev}" "${2-:test}"
   __launch_tmux "dev"
   exit $?
   ;;
 node)
   shift 1
-  __tmux_conf "node" "${1:-server}" "${1-:client}"
+  __tmux_conf "node" "${1:-server}" "${2-:client}"
   __launch_tmux "node"
   exit $?
   ;;
 test)
   shift 1
-  __tmux_conf "test" "${1:-1}" "${1-:2}"
+  __tmux_conf "test" "${1:-1}" "${2-:2}"
   __launch_tmux "test"
   exit $?
   ;;
 default)
   shift 1
-  __tmux_conf "default" "${1:-1}" "${1-:2}"
+  __tmux_conf "default" "${1:-1}" "${2-:2}"
   __launch_tmux "default"
   exit $?
   ;;
