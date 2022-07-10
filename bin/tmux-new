@@ -307,43 +307,43 @@ TMUX_NEW_FILE_CONF_LOCAL="${TMUX_NEW_FILE_CONF_LOCAL:-$TMUX_NEW_CONFIG_DIR/local
 case "$1" in
 build)
   shift 1
-  __tmux_conf "build" "${1:-build}" "${2:-log}"
-  __create_windows "build" "${1:-build}" "${2:-log}"
+  __tmux_conf "build" "${1:-build}" "${2:-log}" &>/dev/null
+  __create_windows "build" "${1:-build}" "${2:-log}" &>/dev/null
   __launch_tmux "build"
   exit $?
   ;;
 ssh)
   shift 1
-  __tmux_conf "ssh" "${1:-local}" "${2:-remote}"
-  __create_windows "ssh" "${1:-local}" "${2:-remote}"
+  __tmux_conf "ssh" "${1:-local}" "${2:-remote}" &>/dev/null
+  __create_windows "ssh" "${1:-local}" "${2:-remote}" &>/dev/null
   __launch_tmux "ssh"
   exit $?
   ;;
 dev)
   shift 1
-  __tmux_conf "dev" "${1:-dev}" "${2:-test}"
-  __create_windows "dev" "${1:-dev}" "${2:-test}"
+  __tmux_conf "dev" "${1:-dev}" "${2:-test}" &>/dev/null
+  __create_windows "dev" "${1:-dev}" "${2:-test}" &>/dev/null
   __launch_tmux "dev"
   exit $?
   ;;
 node)
   shift 1
-  __tmux_conf "node" "${1:-server}" "${2:-client}"
-  __create_windows "node" "${1:-server}" "${2:-client}"
+  __tmux_conf "node" "${1:-server}" "${2:-client}" &>/dev/null
+  __create_windows "node" "${1:-server}" "${2:-client}" &>/dev/null
   __launch_tmux "node"
   exit $?
   ;;
 test)
   shift 1
-  __tmux_conf "test" "${1:-1}" "${2:-2}"
-  __create_windows "test" "${1:-1}" "${2:-2}"
+  __tmux_conf "test" "${1:-1}" "${2:-2}" &>/dev/null
+  __create_windows "test" "${1:-1}" "${2:-2}" &>/dev/null
   __launch_tmux "test"
   exit $?
   ;;
 default)
   shift 1
-  __tmux_conf "default" "${1:-1}" "${2:-2}"
-  __create_windows "default" "${1:-1}" "${2:-2}"
+  __tmux_conf "default" "${1:-1}" "${2:-2}" &>/dev/null
+  __create_windows "default" "${1:-1}" "${2:-2}" &>/dev/null
   __launch_tmux "default"
   exit $?
   ;;
