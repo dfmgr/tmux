@@ -124,8 +124,6 @@ __tmux_conf() {
   local name="${1:-default}"
   local win_1="${2:-1}"
   local win_2="${3:-2}"
-  [[ -d "$TMUX_NEW_FILE_CONF" ]] || mkdir -p "$TMUX_NEW_FILE_CONF"
-  [[ -d "$TMUX_NEW_FILE_LOCAL" ]] || mkdir -p "$TMUX_NEW_FILE_LOCAL"
   if [[ -f "$TMUX_NEW_FILE_CONF/$name" ]] && [[ -f "$TMUX_NEW_FILE_LOCAL/$name" ]]; then
     return 0
   fi
@@ -275,12 +273,16 @@ cmd_exists --error --ask bash tmux || exit 1 # exit 1 if not found
 #__am_i_online --error || exit 1     # exit 1 if no internet
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # APP Variables overrides
-TMUX_NEW_FILE_CONF="$TMUX_NEW_CONFIG_DIR/conf"
-TMUX_NEW_FILE_LOCAL="$TMUX_NEW_CONFIG_DIR/local"
+TMUX_NEW_FILE_CONF="${TMUX_NEW_FILE_CONF:-$TMUX_NEW_CONFIG_DIR/conf}"
+TMUX_NEW_FILE_LOCAL="${TMUX_NEW_FILE_LOCAL:-$TMUX_NEW_CONFIG_DIR/local}"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Actions based on env
 [[ -n "$TMUX_NEW_CWD" ]] && __cd "$TMUX_NEW_CWD"
+[[ -d "$TMUX_NEW_CONFIG_DIR" ]] || mkdir -p "$TMUX_NEW_CONFIG_DIR"
+[[ -d "$TMUX_NEW_FILE_CONF" ]] || mkdir -p "$TMUX_NEW_FILE_CONF"
+[[ -d "$TMUX_NEW_FILE_LOCAL" ]] || mkdir -p "$TMUX_NEW_FILE_LOCAL"
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # begin main app
 case "$1" in
