@@ -115,7 +115,7 @@ __launch_tmux() {
   # Start tmux
   if [[ -z "$TMUX" ]]; then
     sleep 3
-    tmux -f "$TMUX_NEW_FILE_CONF/$name" new-session -D -A -s $name 'tmux source-file '$TMUX_NEW_FILE_WINDOWS/$name'' 2>"$TMUX_NEW_LOG_DIR/$APPNAME.log"
+    tmux -f "$TMUX_NEW_FILE_CONF/$name" new-session -D -A -s $name 'tmux source-file '$TMUX_NEW_FILE_WINDOWS/$name'' &>"$TMUX_NEW_LOG_DIR/$APPNAME.log"
     return $?
   else
     printf_exit "You appear to already have tmux running"
@@ -132,7 +132,7 @@ __tmux_conf() {
     printf_cyan "Creating $TMUX_NEW_FILE_CONF/$name"
     cp -Rf "$TMUX_NEW_FILE_CONF/template" "$TMUX_NEW_FILE_CONF/$name"
     [[ -f "$TMUX_NEW_FILE_CONF_LOCAL/$name" ]] &&
-      sed -i 's|"TMUX_NEW_CONF_FILE_LOCAL"|'${TMUX_NEW_FILE_CONF_LOCAL}/${name}'|g' "$TMUX_NEW_FILE_CONF_LOCAL/$name"
+      sed -i 's|TMUX_NEW_CONF_FILE_LOCAL|'${TMUX_NEW_FILE_CONF_LOCAL}/${name}'|g' "$TMUX_NEW_FILE_CONF_LOCAL/$name"
     [[ -f "$TMUX_NEW_FILE_CONF/$name" ]] &&
       sed -i 's|"TMUX_NEW_CONF_FILE"|'${TMUX_NEW_FILE_CONF}/${name}'|g' "$TMUX_NEW_FILE_CONF/$name"
     [[ -f "$TMUX_NEW_FILE_CONF/$name" ]] &&
@@ -158,8 +158,8 @@ __create_windows() {
     printf_green "Creating tmux windows file"
     cat <<EOF >"$TMUX_NEW_FILE_WINDOWS/$name"
 # start with 2 windows
-neww -n ${win_1_name}  bash -c "${win_1_cmd} 2>>$TMUX_NEW_LOG_DIR/$name.err"
-neww -n ${win_2_name}  bash -c "${win_2_cmd} 2>>$TMUX_NEW_LOG_DIR/$name.err"
+neww -n ${win_1_name}  ${win_1_cmd}
+neww -n ${win_2_name}  ${win_2_cmd}
 
 EOF
     [[ -f "$TMUX_NEW_FILE_WINDOWS/$name" ]] &&
