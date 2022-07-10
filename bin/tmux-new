@@ -25,7 +25,6 @@ SRC_DIR="${BASH_SOURCE%/*}"
 if [[ "$1" == "--debug" ]]; then shift 1 && set -xo pipefail && export SCRIPT_OPTS="--debug" && export _DEBUG="on"; fi
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main function file
 if [[ -f "$SRC_DIR/functions.bash" ]]; then
   FUNCTIONS_DIR="$SRC_DIR"
@@ -61,7 +60,6 @@ __help() {
     "$PROG --options              -  used by completions"
   exit $?
 }
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __gen_config() {
   [[ -z "$NOTIFY_CLIENT_NAME" ]] || NOTIFY_CLIENT_NAME=""
@@ -122,6 +120,7 @@ __tmux_conf() {
   local name="${1:-default}"
   local win_1="${2:-1}"
   local win_2="${3:-2}"
+  local CASJAYSDEVDIR="${CASJAYSDEVDIR:-/usr/local/share/CasjaysDev/scripts}"
   { [[ -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]] && [[ -f "$TMUX_NEW_CONFIG_DIR/$name.local" ]]; } && return 0
   # Create main config files
   if [[ -f "$CASJAYSDEVDIR/templates/tmux-new.conf" ]] && [[ ! -f "$TMUX_NEW_CONFIG_DIR/$name.conf" ]]; then
