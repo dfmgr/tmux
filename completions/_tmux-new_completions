@@ -22,13 +22,13 @@ _tmux-new() {
   local CONFFILE="settings.conf"
   local CONFDIR="$HOME/.config/myscripts/tmux-new"
   local SEARCHDIR="${CONFDIR:-$HOME/.config/myscripts/tmux-new}"
-  #local SEARCHCMD="$(___findcmd "$SEARCHDIR/" "d" "1" | sort -u)"
+  local SEARCHCMD="$(___findcmd "$SEARCHDIR/" "d" "1" | sort -u)"
   local SHOW_COMP_OPTS=""
   local FILEDIR=""
   local OPTS=""
   local LONGOPTS="--debug --options --config --version --help --dir "
   local SHORTOPTS=""
-  local ARRAY="create build ssh dev node test edit default"
+  local ARRAY="create build ssh dev node test edit default $SEARCHCMD"
 
   _init_completion || return
 
