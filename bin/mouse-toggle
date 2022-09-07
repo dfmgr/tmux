@@ -21,41 +21,19 @@ SRC_DIR="${BASH_SOURCE%/*}"
 # @Other         :
 # @Resource      :
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Main function file
-if [ -f "$SRC_DIR/functions.bash" ]; then
-  FUNCTIONS_DIR="$SRC_DIR"
-  . "$FUNCTIONS_DIR/functions.bash"
-elif [ -f "$HOME/.local/bin/functions.bash" ]; then
-  FUNCTIONS_DIR="$HOME/.local/bin"
-  . "$FUNCTIONS_DIR/functions.bash"
-else
-  printf "\t\t\033[0;31m%s \033[0m\n" "Couldn't source the functions file from $FUNCTIONS_DIR"
-  return 1
-fi
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# helper function
-__version() { app_version; }
-__help() {
-  app_help "Usage: mouse-toggle  -  mouse-toggle --version" \
-    "-v, --version          -  display version" \
-    "-h, --help             -  display help"
-}
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Main function
+# Main functions
 __get_mouse_status() {
-  tmux show-options -gw mouse 2>&1 | grep -q on ||
-    tmux show-options -g mouse 2>&1 | grep -q on || return 1
-  return 0
+  if ! tmux show-options -gw mouse 2>&1 | grep -q on; then
+    return 0
+  elif ! tmux show-options -g mouse 2>&1 | grep -q on; then
+    return 0
+  else
+    return 1
+  fi
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # options
-case $1 in
--v | --version) __version ;;
--h | --help) __help ;;
-esac
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Required app check
-cmd_exists --error bash tmux || exit 1
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # begin main app
 if [ -n "$TMUX" ]; then
@@ -76,7 +54,7 @@ if [ -n "$TMUX" ]; then
   fi
   exitCode=0
 else
-  printf_red "This doesn't seem to be a tmux session"
+  echo "This doesn't seem to be a tmux session" 1>&2
   exitCode=0
 fi
 exitCode="${exitCode:-$?}"
