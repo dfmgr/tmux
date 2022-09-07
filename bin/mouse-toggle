@@ -42,6 +42,11 @@ __help() {
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main function
+__get_mouse_status() {
+  tmux show-options -gw mouse 2>&1 | grep -q on ||
+    tmux show-options -g mouse 2>&1 | grep -q on || return 1
+  return 0
+}
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # options
 case $1 in
@@ -54,7 +59,7 @@ cmd_exists --error bash tmux || exit 1
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # begin main app
 if [ -n "$TMUX" ]; then
-  if tmux show-options -gw mouse 2>/dev/null | grep -q on; then
+  if __get_mouse_status; then
     tmux set-option -gq mouse-utf8 off
     tmux set-option -gq mouse-resize-pane off
     tmux set-option -gq mouse-select-pane off
