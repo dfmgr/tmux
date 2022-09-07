@@ -23,9 +23,9 @@ SRC_DIR="${BASH_SOURCE%/*}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main functions
 __get_mouse_status() {
-  if ! tmux show-options -gw mouse 2>&1 | grep -q on; then
+  if tmux show-options -gw mouse 2>&1 | grep -q on; then
     return 0
-  elif ! tmux show-options -g mouse 2>&1 | grep -q on; then
+  elif tmux show-options -g mouse 2>&1 | grep -q on; then
     return 0
   else
     return 1
