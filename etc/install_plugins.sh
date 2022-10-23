@@ -27,18 +27,19 @@ if [ "$1" = "--debug" ]; then shift 1 && set -xo pipefail && export SCRIPT_OPTS=
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 TMUX_HOME="${TMUX_HOME:-$HOME/.config/tmux}"
 TMUX_SHARE_DIR="${TMUX_SHARE_DIR:-$HOME/.local/share/tmux}"
-TMUX_PLUGIN_MANAGER_PATH="${TMUX_PLUGIN_MANAGER_PATH:-$TMUX_SHARE_DIR/tpm}"
+TMUX_PLUGIN_MANAGER_PATH="${TMUX_PLUGIN_MANAGER_PATH:-$TMUX_SHARE_DIR/plugins}"
+
 export TMUX_HOME TMUX_PLUGIN_MANAGER_PATH TMUX_SHARE_DIR
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-if [ -d "$TMUX_PLUGIN_MANAGER_PATH/.git" ]; then
-  git -C "$TMUX_PLUGIN_MANAGER_PATH" pull -qq &>/dev/null
+if [ -d "$TMUX_PLUGIN_MANAGER_PATH/tpm/.git" ]; then
+  git -C "$TMUX_PLUGIN_MANAGER_PATH/tpm" pull -qq &>/dev/null
 else
-  [ -d "$TMUX_PLUGIN_MANAGER_PATH" ] && rm -Rf "$TMUX_PLUGIN_MANAGER_PATH"
-  git clone "https://github.com/tmux-plugins/tpm" "$TMUX_PLUGIN_MANAGER_PATH" &>/dev/null
+  [ -d "$TMUX_PLUGIN_MANAGER_PATH/tpm" ] && rm -Rf "$TMUX_PLUGIN_MANAGER_PATH/tpm"
+  git clone "https://github.com/tmux-plugins/tpm" "$TMUX_PLUGIN_MANAGER_PATH/tpm" &>/dev/null
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-if [ -x "$TMUX_PLUGIN_MANAGER_PATH/bin/install_plugins" ]; then
-  "$TMUX_PLUGIN_MANAGER_PATH/bin/install_plugins"
+if [ -x "$TMUX_PLUGIN_MANAGER_PATH/tpm/bin/install_plugins" ]; then
+  "$TMUX_PLUGIN_MANAGER_PATH/tpm/bin/install_plugins"
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 mkdir -p "$TMUX_SHARE_DIR/resurrect"
@@ -47,7 +48,7 @@ if [ -f "$TMUX_HOME/resurrect" ]; then
   ln -sf "$TMUX_HOME/resurrect" "$TMUX_SHARE_DIR/resurrect/last"
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-if [ -f "$TMUX_PLUGIN_MANAGER_PATH/tpm" ] && [ -f "$TMUX_SHARE_DIR/resurrect/last" ]; then
+if [ -f "$TMUX_PLUGIN_MANAGER_PATH/tpm/tpm" ] && [ -f "$TMUX_SHARE_DIR/resurrect/last" ]; then
   echo "Install completed"
   exitCode=0
 else
