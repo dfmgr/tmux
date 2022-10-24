@@ -75,17 +75,19 @@ while :; do
 done
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main application
-if [ -f "$HOME/.cache/tmux_weather" ]; then
-  find "$HOME/.cache" -maxdepth 1 -mmin +60 -type f -name tmux_weather | grep '^' &&
-    rm -Rf "$HOME/.cache/tmux_weather" && exitCode=1 || exitCode=0
-fi
+[ -s "$HOME/.cache/tmux_weather" ] || rm -Rf "$HOME/.cache/tmux_weather"
+[ -f "$HOME/.cache/tmux_weather" ] && find "$HOME/.cache/tmux_weather" -maxdepth 1 -daystart -maxdepth 1 -mmin +120 -type f -name -exec rm -f {} \; 2>/dev/null && exitCode=1 || exitCode=0
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if [ "$exitCode" -ne 0 ] || [ ! -s "$HOME/.cache/tmux_weather" ]; then
-  curl -q -ILSsf -m 1 --retry 1 "https://1.1.1.1" | grep -qi 'server:*.cloudflare' &&
-    curl -q -LSsf -m 1 "https://wttr.in/?format=3" 2>/dev/null | awk '{print $1,$(NF-1),$NF}' | sed 's|, |: |g' | grep '^' >"$HOME/.cache/tmux_weather" || echo ''
+  curl -q -LSsf -m 1 "https://wttr.in/?format=3" 2>/dev/null |
+    grep -viE ^'Unknown location;' | awk '{print $1,$(NF-1),$NF}' |
+    sed 's|, |: |g' | grep '^' >"$HOME/.cache/tmux_weather" || rm -Rf "$HOME/.cache/tmux_weather"
 fi
 if [ -f "$HOME/.cache/tmux_weather" ]; then
   grep -s '^' "$HOME/.cache/tmux_weather"
   exitCode="$?"
+else
+  echo "Error"
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # End application
