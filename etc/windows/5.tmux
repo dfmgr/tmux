@@ -4,4 +4,3 @@ neww bash
 neww bash
 neww fish
 neww zsh
-
