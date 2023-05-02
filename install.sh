@@ -175,6 +175,9 @@ RUBY_GEMS=""
 PYTHON_PIP=""
 PHP_COMPOSER=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Run custom actions
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Show a custom message after install
 __run_post_message() {
   true
@@ -197,7 +200,6 @@ __run_prepost_install() {
 # run after primary post install function
 __run_post_install() {
   local getRunStatus=0
-  touch "$HOME/.taskrc"
   __mkdir "$HOME/.local/share/tmux/resurrect"
   __symlink "$APPDIR/tmux.conf" "$HOME/.tmux.conf"
   bash -c "$INSTDIR/etc/install_plugins.sh"
