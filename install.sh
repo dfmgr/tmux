@@ -196,7 +196,8 @@ __run_pre_install() {
 # run before primary post install function
 __run_prepost_install() {
   local getRunStatus=0
-
+  [ -d "$HOME/.local/share/tmux/plugins/zen/tpm/.git" ] || git clone -q "https://github.com/tmux-plugins/tpm" "$HOME/.local/share/tmux/plugins/zen/tpm"
+  [ -d "$HOME/.local/share/tmux/plugins/default/tpm/.git" ] || git clone -q "https://github.com/tmux-plugins/tpm" "$HOME/.local/share/tmux/plugins/default/tpm"
   return $getRunStatus
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

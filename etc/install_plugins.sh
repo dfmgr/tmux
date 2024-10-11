@@ -27,7 +27,7 @@ if [ "$1" = "--debug" ]; then shift 1 && set -xo pipefail && export SCRIPT_OPTS=
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 TMUX_HOME="${TMUX_HOME:-$HOME/.config/tmux}"
 TMUX_SHARE_DIR="${TMUX_SHARE_DIR:-$HOME/.local/share/tmux}"
-TMUX_PLUGIN_MANAGER_PATH="${TMUX_PLUGIN_MANAGER_PATH:-$TMUX_SHARE_DIR/plugins}"
+TMUX_PLUGIN_MANAGER_PATH="${TMUX_PLUGIN_MANAGER_PATH:-$TMUX_SHARE_DIR/plugins/default}"
 
 export TMUX_HOME TMUX_PLUGIN_MANAGER_PATH TMUX_SHARE_DIR
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
