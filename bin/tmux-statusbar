@@ -1,0 +1,220 @@
+#!/usr/bin/env bash
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+##@Version           :  202601061641-git
+##@Author            :  Jason Hempstead
+##@Contact           :  jason@casjaysdev.pro
+##@License           :  WTFPL
+##@ReadME            :  tmux-statusbar --help
+##@Copyright         :  Copyright: (c) 2025 Jason Hempstead, Casjays Developments
+##@Created           :  Monday, Jan 06, 2025 16:41 EST
+##@File              :  tmux-statusbar
+##@Description       :  Tmux status bar helper script
+##@Changelog         :  New script
+##@TODO              :  Better documentation
+##@Other             :
+##@Resource          :
+##@sudo/root         :  no
+##@Template          :  bash/system
+# shellcheck disable=SC2016,SC2031,SC2120,SC2155,SC2199,SC2317
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Set bash options
+set -o pipefail
+[ "$DEBUGGER" = "on" ] && echo "Enabling debugging" && set -x$DEBUGGER_OPTIONS
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+APPNAME="$(basename "$0" 2>/dev/null)"
+VERSION="202601061641-git"
+USER="${SUDO_USER:-$USER}"
+HOME="${USER_HOME:-$HOME}"
+SRC_DIR="${BASH_SOURCE%/*}"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Set working directory
+[ -d "$SRC_DIR" ] && cd "$SRC_DIR" || exit 1
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Tmux status bar commands
+# Usage: tmux-statusbar <command>
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Cache directory
+CACHE_DIR="${HOME}/.cache/tmux"
+mkdir -p "$CACHE_DIR" 2>/dev/null
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Cache helper function
+_cache_get() {
+  local cache_file="$1"
+  local cache_ttl="$2"
+  local current_time=$(date +%s)
+  local file_time=$(stat -c %Y "$cache_file" 2>/dev/null || echo 0)
+  local age=$((current_time - file_time))
+
+  if [ ! -f "$cache_file" ] || [ $age -gt $cache_ttl ]; then
+    return 1  # Cache miss or expired
+  else
+    cat "$cache_file" 2>/dev/null
+    return 0  # Cache hit
+  fi
+}
+
+_cache_set() {
+  local cache_file="$1"
+  local content="$2"
+  echo "$content" > "$cache_file" 2>/dev/null
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Weather function with 1-hour cache
+weather() {
+  local cache_file="${CACHE_DIR}/weather"
+  local cache_ttl=3600  # 1 hour
+
+  if ! _cache_get "$cache_file" "$cache_ttl"; then
+    local server="${TMUX_WEATHER_SERVER:-https://wthr.top}"
+    local location="${MYLOCATION_NAME:-${TMUX_WEATHER_LOCATION}}"
+    local weather_data
+
+    weather_data=$(curl -q -LSsf -m 2 "${server}/${location}?u&format=3" 2>/dev/null | sed 's/:/ /g;s/°F/F/g' || echo 'No Weather')
+    _cache_set "$cache_file" "$weather_data"
+    echo "$weather_data"
+  fi
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Uptime function with 1-minute cache
+uptime_short() {
+  local cache_file="${CACHE_DIR}/uptime"
+  local cache_ttl=60  # 1 minute
+
+  if ! _cache_get "$cache_file" "$cache_ttl"; then
+    local uptime_data
+    uptime_data=$(uptime | awk '{print $3}' | sed 's/,//')
+    _cache_set "$cache_file" "$uptime_data"
+    echo "$uptime_data"
+  fi
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Load average function
+loadavg() {
+  local cache_file="${CACHE_DIR}/loadavg"
+  local cache_ttl=10  # 10 seconds
+
+  if ! _cache_get "$cache_file" "$cache_ttl"; then
+    local load_data
+    load_data=$(cut -d' ' -f1-3 /proc/loadavg 2>/dev/null || uptime | sed 's/.*load average: //' | awk '{print $1, $2, $3}')
+    _cache_set "$cache_file" "$load_data"
+    echo "$load_data"
+  fi
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Memory usage function
+memory() {
+  local cache_file="${CACHE_DIR}/memory"
+  local cache_ttl=10  # 10 seconds
+
+  if ! _cache_get "$cache_file" "$cache_ttl"; then
+    local mem_data
+    mem_data=$(free -h | awk '/^Mem:/ {print $3 "/" $2}')
+    _cache_set "$cache_file" "$mem_data"
+    echo "$mem_data"
+  fi
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# CPU usage function
+cpu() {
+  local cache_file="${CACHE_DIR}/cpu"
+  local cache_ttl=5  # 5 seconds
+
+  if ! _cache_get "$cache_file" "$cache_ttl"; then
+    local cpu_data
+    cpu_data=$(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1"%"}')
+    _cache_set "$cache_file" "$cpu_data"
+    echo "$cpu_data"
+  fi
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Battery status function (if applicable)
+battery() {
+  local cache_file="${CACHE_DIR}/battery"
+  local cache_ttl=60  # 1 minute
+
+  if ! _cache_get "$cache_file" "$cache_ttl"; then
+    local battery_data="N/A"
+
+    if [ -d /sys/class/power_supply/BAT0 ]; then
+      local capacity=$(cat /sys/class/power_supply/BAT0/capacity 2>/dev/null || echo "?")
+      local status=$(cat /sys/class/power_supply/BAT0/status 2>/dev/null || echo "Unknown")
+      battery_data="${capacity}% ${status}"
+    elif command -v pmset >/dev/null 2>&1; then
+      # macOS
+      battery_data=$(pmset -g batt | grep -Eo "\d+%" | head -1)
+    fi
+
+    _cache_set "$cache_file" "$battery_data"
+    echo "$battery_data"
+  fi
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Help function
+show_help() {
+  cat <<EOF
+tmux-statusbar - Tmux status bar helper script
+
+Usage: tmux-statusbar <command>
+
+Available commands:
+  weather       - Display weather information (cached 1 hour)
+  uptime        - Display short uptime (cached 1 minute)
+  loadavg       - Display load average (cached 10 seconds)
+  memory        - Display memory usage (cached 10 seconds)
+  cpu           - Display CPU usage (cached 5 seconds)
+  battery       - Display battery status (cached 1 minute)
+  help          - Show this help message
+
+Environment variables:
+  TMUX_WEATHER_SERVER    - Weather server URL (default: https://wthr.top)
+  TMUX_WEATHER_LOCATION  - Weather location
+  MYLOCATION_NAME        - Alternative location variable
+
+Examples:
+  tmux-statusbar weather
+  tmux-statusbar uptime
+
+In tmux.conf:
+  set -g status-right "#(~/.config/tmux/bin/tmux-statusbar weather)"
+
+EOF
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Main command dispatcher
+main() {
+  local command="${1:-help}"
+
+  case "$command" in
+    weather)
+      weather
+      ;;
+    uptime)
+      uptime_short
+      ;;
+    loadavg)
+      loadavg
+      ;;
+    memory)
+      memory
+      ;;
+    cpu)
+      cpu
+      ;;
+    battery)
+      battery
+      ;;
+    help|--help|-h)
+      show_help
+      ;;
+    *)
+      echo "Unknown command: $command"
+      echo "Run 'tmux-statusbar help' for usage information"
+      exit 1
+      ;;
+  esac
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Execute main function
+main "$@"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# vim: ft=sh ts=2 sw=2 sts=2 et
