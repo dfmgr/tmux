@@ -36,6 +36,8 @@ SRC_DIR="${BASH_SOURCE%/*}"
 # Cache directory
 CACHE_DIR="${HOME}/.cache/tmux"
 mkdir -p "$CACHE_DIR" 2>/dev/null
+# Default location for weather
+MYLOCATION_NAME="${MYLOCATION_NAME:-New York, NY}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Cache helper function
 _cache_get() {
@@ -66,10 +68,12 @@ weather() {
 
   if ! _cache_get "$cache_file" "$cache_ttl"; then
     local server="${TMUX_WEATHER_SERVER:-https://wthr.top}"
-    local location="${MYLOCATION_NAME:-${TMUX_WEATHER_LOCATION}}"
+    local location="${MYLOCATION_NAME}"
+    # URL encode the location (replace spaces with %20)
+    local encoded_location="${location// /%20}"
     local weather_data
 
-    weather_data=$(curl -q -LSsf -m 2 "${server}/${location}?u&format=3" 2>/dev/null | sed 's/:/ /g;s/°F/F/g' || echo 'No Weather')
+    weather_data=$(curl -q -LSsf -m 2 "${server}/${encoded_location}?u&format=3" 2>/dev/null | sed 's/:/ /g;s/°F/F/g' || echo 'No Weather')
     _cache_set "$cache_file" "$weather_data"
     echo "$weather_data"
   fi
