@@ -36,8 +36,8 @@ SRC_DIR="${BASH_SOURCE%/*}"
 # Cache directory
 CACHE_DIR="${HOME}/.cache/tmux"
 mkdir -p "$CACHE_DIR" 2>/dev/null
-# Default location for weather
-MYLOCATION_NAME="${MYLOCATION_NAME:-New York, NY}"
+# Default location for weather (MYLOCATION_NAME > TMUX_WEATHER_LOCATION > fallback)
+MYLOCATION_NAME="${MYLOCATION_NAME:-${TMUX_WEATHER_LOCATION:-New York, NY}}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Cache helper function
 _cache_get() {
