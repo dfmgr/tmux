@@ -47,8 +47,8 @@ _cache_get() {
   local file_time=$(stat -c %Y "$cache_file" 2>/dev/null || echo 0)
   local age=$((current_time - file_time))
 
-  if [ ! -f "$cache_file" ] || [ $age -gt $cache_ttl ]; then
-    return 1  # Cache miss or expired
+  if [ ! -s "$cache_file" ] || [ $age -gt $cache_ttl ]; then
+    return 1  # Cache miss, expired, or empty file
   else
     cat "$cache_file" 2>/dev/null
     return 0  # Cache hit
@@ -58,7 +58,8 @@ _cache_get() {
 _cache_set() {
   local cache_file="$1"
   local content="$2"
-  echo "$content" > "$cache_file" 2>/dev/null
+  # Only cache non-empty values to prevent stale empty cache files
+  [ -n "$content" ] && echo "$content" > "$cache_file" 2>/dev/null
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Weather function with 1-hour cache
@@ -86,7 +87,7 @@ uptime_short() {
 
   if ! _cache_get "$cache_file" "$cache_ttl"; then
     local uptime_data
-    uptime_data=$(uptime | awk '{print $3}' | sed 's/,//')
+    uptime_data=$(awk '{t=$1;d=int(t/86400);t=t%86400;h=int(t/3600);t=t%3600;m=int(t/60);out="";if(d>0)out=out d"d";if(h>0)out=out (out?":":"") h"h";if(m>0)out=out (out?":":"") m"m";if(out=="")out="0m";print out}' /proc/uptime 2>/dev/null || uptime | sed 's/.*up \([^,]*\),.*/\1/' | xargs)
     _cache_set "$cache_file" "$uptime_data"
     echo "$uptime_data"
   fi
