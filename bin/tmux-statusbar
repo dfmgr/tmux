@@ -74,7 +74,7 @@ weather() {
     local encoded_location="${location// /%20}"
     local weather_data
 
-    weather_data=$(curl -q -LSsf -m 2 "${server}/${encoded_location}?u&format=3" 2>/dev/null | sed 's/:/ /g;s/°F/F/g' || echo 'No Weather')
+    weather_data=$(curl -q -LSsf -m 2 "${server}/${encoded_location}?u&format=3" 2>/dev/null | sed 's/:/ /g;s/°F/F/g')
     _cache_set "$cache_file" "$weather_data"
     echo "$weather_data"
   fi
@@ -90,6 +90,39 @@ uptime_short() {
     uptime_data=$(awk '{t=$1;d=int(t/86400);t=t%86400;h=int(t/3600);t=t%3600;m=int(t/60);out="";if(d>0)out=out d"d";if(h>0)out=out (out?":":"") h"h";if(m>0)out=out (out?":":"") m"m";if(out=="")out="0m";print out}' /proc/uptime 2>/dev/null || uptime | sed 's/.*up \([^,]*\),.*/\1/' | xargs)
     _cache_set "$cache_file" "$uptime_data"
     echo "$uptime_data"
+  fi
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Git status function — outputs branch+flags or nothing if not in a git repo
+# Usage: git_status [path]  (defaults to CWD; path used to key cache per repo)
+git_status() {
+  local search_dir="${1:-$PWD}"
+  local topdir
+  local git_data=""
+
+  # Resolve git toplevel; bail silently if not in a repo
+  topdir=$(git -C "$search_dir" rev-parse --show-toplevel 2>/dev/null) || { echo ""; return 0; }
+
+  local cache_key
+  cache_key=$(printf '%s' "$topdir" | tr '/' '_')
+  local cache_file="${CACHE_DIR}/git_${cache_key}"
+  local cache_ttl=5  # 5 seconds
+
+  if ! _cache_get "$cache_file" "$cache_ttl"; then
+    local branch=""
+    branch=$(git -C "$topdir" symbolic-ref --short HEAD 2>/dev/null) \
+      || branch=$(git -C "$topdir" rev-parse --short HEAD 2>/dev/null) \
+      || branch="detached"
+
+    local flags=""
+    git -C "$topdir" diff --quiet 2>/dev/null              || flags="${flags}*"
+    git -C "$topdir" diff --cached --quiet 2>/dev/null     || flags="${flags}+"
+    [ -n "$(git -C "$topdir" ls-files --others --exclude-standard 2>/dev/null)" ] \
+                                                           && flags="${flags}?"
+
+    git_data="${branch}${flags:+ $flags}"
+    _cache_set "$cache_file" "$git_data"
+    echo "$git_data"
   fi
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -162,6 +195,7 @@ tmux-statusbar - Tmux status bar helper script
 Usage: tmux-statusbar <command>
 
 Available commands:
+  git [path]    - Display git branch+status for path (default: CWD, cached 5s)
   weather       - Display weather information (cached 1 hour)
   uptime        - Display short uptime (cached 1 minute)
   loadavg       - Display load average (cached 10 seconds)
@@ -190,6 +224,9 @@ main() {
   local command="${1:-help}"
 
   case "$command" in
+    git)
+      git_status
+      ;;
     weather)
       weather
       ;;
