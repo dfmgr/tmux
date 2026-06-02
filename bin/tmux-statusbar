@@ -27,6 +27,8 @@ USER="${SUDO_USER:-$USER}"
 HOME="${USER_HOME:-$HOME}"
 SRC_DIR="${BASH_SOURCE%/*}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Save caller's CWD before any cd — used as default path for git_status
+ORIG_PWD="$PWD"
 # Set working directory
 [ -d "$SRC_DIR" ] && cd "$SRC_DIR" || exit 1
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -96,7 +98,7 @@ uptime_short() {
 # Git status function — outputs branch+flags or nothing if not in a git repo
 # Usage: git_status [path]  (defaults to CWD; path used to key cache per repo)
 git_status() {
-  local search_dir="${1:-$PWD}"
+  local search_dir="${1:-$ORIG_PWD}"
   local topdir
   local git_data=""
 
@@ -225,7 +227,7 @@ main() {
 
   case "$command" in
     git)
-      git_status
+      git_status "$2"
       ;;
     weather)
       weather
