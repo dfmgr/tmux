@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version           :  202601061641-git
+##@Version           :  202606131230-git
 ##@Author            :  Jason Hempstead
 ##@Contact           :  jason@casjaysdev.pro
 ##@License           :  WTFPL
@@ -22,7 +22,7 @@ set -o pipefail
 [ "$DEBUGGER" = "on" ] && echo "Enabling debugging" && set -x$DEBUGGER_OPTIONS
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 APPNAME="$(basename "$0" 2>/dev/null)"
-VERSION="202601061641-git"
+VERSION="202606131230-git"
 USER="${SUDO_USER:-$USER}"
 HOME="${USER_HOME:-$HOME}"
 SRC_DIR="${BASH_SOURCE%/*}"
@@ -77,8 +77,8 @@ weather() {
     local weather_data
 
     weather_data=$(curl -q -LSsf -m 2 "${server}/${encoded_location}?u&format=3" 2>/dev/null | sed 's/:/ /g;s/°F/F/g')
-    _cache_set "$cache_file" "$weather_data"
-    echo "$weather_data"
+    [ -n "$weather_data" ] && _cache_set "$cache_file" "$(printf '#[fg=#ff79c6]%s#[fg=#6272a4]│' "$weather_data")"
+    [ -n "$weather_data" ] && printf '#[fg=#ff79c6]%s#[fg=#6272a4]│\n' "$weather_data"
   fi
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -103,7 +103,7 @@ git_status() {
   local git_data=""
 
   # Resolve git toplevel; bail silently if not in a repo
-  topdir=$(git -C "$search_dir" rev-parse --show-toplevel 2>/dev/null) || { echo ""; return 0; }
+  topdir=$(git -C "$search_dir" rev-parse --show-toplevel 2>/dev/null) || return 0
 
   local cache_key
   cache_key=$(printf '%s' "$topdir" | tr '/' '_')
@@ -123,8 +123,8 @@ git_status() {
                                                            && flags="${flags}?"
 
     git_data="${branch}${flags:+ $flags}"
-    _cache_set "$cache_file" "$git_data"
-    echo "$git_data"
+    _cache_set "$cache_file" "$(printf '#[fg=#f1fa8c]%s#[fg=#6272a4]│' "$git_data")"
+    printf '#[fg=#f1fa8c]%s#[fg=#6272a4]│\n' "$git_data"
   fi
 }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
